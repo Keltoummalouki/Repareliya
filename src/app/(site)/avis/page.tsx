@@ -6,6 +6,7 @@ import { ReviewForm } from "@/components/site/review-form";
 import { ExternalButton } from "@/components/ui/button";
 import { getGooglePlace } from "@/lib/data/google";
 import { getPublishedReviews, getSiteSettings } from "@/lib/data/public";
+import { isSupabaseConfigured } from "@/lib/env";
 
 export const revalidate = 300;
 
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AvisPage() {
+  if (!isSupabaseConfigured()) return null; // le layout affiche déjà <SetupNotice />
   const [settings, data] = await Promise.all([getSiteSettings(), getPublishedReviews(60)]);
   const google = settings.google_place_id ? await getGooglePlace(settings.google_place_id) : null;
   const reviewsUrl = settings.google_reviews_url || google?.url;

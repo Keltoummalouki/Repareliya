@@ -3,6 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { EmptyNote, RealisationCard, SectionHeading } from "@/components/site/blocks";
 import { ButtonLink } from "@/components/ui/button";
 import { getRealisations } from "@/lib/data/public";
+import { isSupabaseConfigured } from "@/lib/env";
 
 export const revalidate = 300;
 
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RealisationsPage() {
+  if (!isSupabaseConfigured()) return null; // le layout affiche déjà <SetupNotice />
   const items = await getRealisations();
   return (
     <div className="container-page py-10 sm:py-14">

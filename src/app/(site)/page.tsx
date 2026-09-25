@@ -17,12 +17,14 @@ import {
   getRepairTypes,
   getSiteSettings,
 } from "@/lib/data/public";
+import { isSupabaseConfigured } from "@/lib/env";
 import { formatMoney, formatPhone } from "@/lib/format";
 import heroImage from "../../../public/images/hero.png";
 
 export const revalidate = 300;
 
 export default async function HomePage() {
+  if (!isSupabaseConfigured()) return null; // le layout affiche déjà <SetupNotice />
   const [settings, categories, brands, repairTypes, featuredPrices, realisations, accessories, reviewData] = await Promise.all([
     getSiteSettings(),
     getCategories(),

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/data/public";
+import { isSupabaseConfigured } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Mentions légales", robots: { index: false } };
 
 export default async function MentionsLegalesPage() {
+  if (!isSupabaseConfigured()) return null; // le layout affiche déjà <SetupNotice />
   const settings = await getSiteSettings();
   return (
     <div className="container-page max-w-3xl py-12 sm:py-16">

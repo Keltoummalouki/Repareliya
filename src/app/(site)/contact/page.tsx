@@ -5,6 +5,7 @@ import { SectionHeading } from "@/components/site/blocks";
 import { DevisForm } from "@/components/site/devis-form";
 import { telLink, whatsappLink } from "@/lib/contact";
 import { getCategories, getRepairTypes, getSiteSettings, getSocialLinks } from "@/lib/data/public";
+import { isSupabaseConfigured } from "@/lib/env";
 import { formatPhone } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage() {
+  if (!isSupabaseConfigured()) return null; // le layout affiche déjà <SetupNotice />
   const [settings, socials, categories, repairTypes] = await Promise.all([getSiteSettings(), getSocialLinks(), getCategories(), getRepairTypes()]);
   const whatsapp = whatsappLink(settings.whatsapp || settings.phone, undefined, settings.default_country);
   const phone = telLink(settings.phone, settings.default_country);
