@@ -71,6 +71,29 @@ Useful scripts:
 - **Google reviews**: set `GOOGLE_PLACES_API_KEY` (Places API "New") and your Place ID in Paramètres. The home and Avis pages then show your Google rating and latest Google reviews.
 - **WhatsApp / SMS** need no API. The dashboard opens WhatsApp (`wa.me`) or the SMS app with the message ready, and you press Send. Fully automatic sending would require the paid WhatsApp Business Platform or an SMS provider (e.g. Twilio).
 
+## CI/CD
+
+[`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml) runs on every pull request and every push to `main`:
+
+- **Lint, typecheck & build**: `npm run lint`, `npm run typecheck`, `npm run build` (no Supabase keys needed).
+- **Migrations & seed**: starts a throwaway local Supabase and checks that `supabase/migrations/*` and `seed.sql` apply cleanly.
+- **Deploy** (on `main` only, after both checks pass): `supabase db push` to the production database, then a production deploy on Vercel.
+
+The deploy is skipped, with a warning, until these **repository secrets** exist (GitHub → Settings → Secrets and variables → Actions):
+
+| Secret | Where to find it |
+| --- | --- |
+| `SUPABASE_ACCESS_TOKEN` | supabase.com → Account → Access Tokens |
+| `SUPABASE_DB_PASSWORD` | The database password chosen when creating the project |
+| `SUPABASE_PROJECT_ID` | The project ref (`https://<project-ref>.supabase.co`) |
+| `VERCEL_TOKEN` | vercel.com → Account Settings → Tokens |
+| `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` | Run `npx vercel link` once, then read `.vercel/project.json` |
+
+Notes:
+- The app's environment variables (`.env.example`) are set in the Vercel project, not in GitHub. The deploy pulls them from Vercel.
+- The deploy never re-applies `seed.sql`. Load it once with `npx supabase db push --include-seed` when going live (step 2 above).
+- `vercel.json` turns off Vercel's own Git deploys for `main`, so production is deployed only by the workflow, after the checks pass. Pull-request preview deployments still work if the repo is connected to Vercel.
+
 ## How it's built
 
 - `src/app/(site)`: public pages (cached, and refreshed immediately when you edit something in the dashboard).

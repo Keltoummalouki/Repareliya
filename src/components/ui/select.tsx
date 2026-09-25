@@ -164,7 +164,7 @@ export function Select({ children, className, value, defaultValue, onChange, id,
       if (!open) show(); else if (active) choose(active);
     } else if (!isSearch && event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
       event.preventDefault();
-      const now = Date.now();
+      const now = event.timeStamp;
       const typed = now - typeahead.current.timestamp > 700 ? event.key : typeahead.current.value + event.key;
       typeahead.current = { value: typed, timestamp: now };
       if (!open) show(hasSearch ? event.key : "");
