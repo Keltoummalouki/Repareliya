@@ -29,11 +29,11 @@ export function NewModelButton({ brands, categories }: { brands: Option[]; categ
         Ajouter un modèle
       </Button>
       {open ? (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" role="dialog" aria-modal="true" aria-label="Nouveau modèle" onClick={(e) => e.target === e.currentTarget && setOpen(false)}>
+        <div className="fixed inset-0 z-50 grid place-items-center bg-scrim p-4" role="dialog" aria-modal="true" aria-label="Nouveau modèle" onClick={(e) => e.target === e.currentTarget && setOpen(false)}>
           <div className="w-full max-w-lg rounded-2xl bg-surface p-6 shadow-(--shadow-float)">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl font-bold">Nouveau modèle</h2>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Fermer" className="grid size-9 place-items-center rounded-lg hover:bg-black/5">
+              <button type="button" onClick={() => setOpen(false)} aria-label="Fermer" className="grid size-9 place-items-center rounded-lg hover:bg-ink/5">
                 <X className="size-5" />
               </button>
             </div>

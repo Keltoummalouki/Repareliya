@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 export type Tone = "neutral" | "info" | "success" | "warning" | "danger" | "brand";
 
 const tones: Record<Tone, string> = {
-  neutral: "bg-black/[0.06] text-ink-soft",
+  neutral: "bg-ink/[0.06] text-ink-soft",
   info: "bg-info-soft text-info",
   success: "bg-success-soft text-success",
   warning: "bg-warning-soft text-warning",

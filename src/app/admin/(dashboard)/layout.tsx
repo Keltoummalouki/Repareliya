@@ -15,7 +15,7 @@ export default async function DashboardLayout({ children }: LayoutProps<"/admin"
   ]);
 
   return (
-    <div className="min-h-screen bg-[#f4f4f0] lg:flex">
+    <div className="min-h-screen bg-[#f4f4f0] dark:bg-bg lg:flex">
       <AdminSidebar email={email} counts={{ requests: requests ?? 0, reviews: reviews ?? 0 }} />
       <div className="min-w-0 flex-1">{children}</div>
     </div>

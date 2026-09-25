@@ -94,11 +94,11 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="relative">
-          <div className="overflow-hidden rounded-[22px] bg-[#efefea]">
+          <div className="overflow-hidden rounded-[22px] bg-subtle">
             <Image src={heroImage} alt="Smartphone à l’écran fissuré, tablette et ordinateur portable prêts à être réparés" priority placeholder="blur" sizes="(min-width: 1024px) 50vw, 100vw" className="h-auto w-full" />
           </div>
           <div className="absolute -bottom-5 left-4 flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 shadow-(--shadow-float) sm:left-6">
-            <span className="grid size-10 place-items-center rounded-xl bg-brand-strong text-white">
+            <span className="grid size-10 place-items-center rounded-xl bg-brand-strong text-on-fill">
               <Wrench className="size-5" aria-hidden />
             </span>
             <span>
@@ -121,7 +121,7 @@ export default async function HomePage() {
                 className="group flex min-h-48 flex-col justify-between rounded-(--radius-card) border border-line bg-bg p-5 transition-colors hover:border-ink hover:bg-surface"
               >
                 <div className="flex items-start justify-between">
-                  <span className="grid size-12 place-items-center rounded-xl bg-surface text-ink ring-1 ring-line group-hover:bg-ink group-hover:text-white">
+                  <span className="grid size-12 place-items-center rounded-xl bg-surface text-ink ring-1 ring-line group-hover:bg-ink group-hover:text-on-fill">
                     <CategoryIcon icon={category.icon} className="size-6" />
                   </span>
                   <span className="text-xs font-semibold text-muted">0{index + 1}</span>
@@ -137,15 +137,15 @@ export default async function HomePage() {
             ))}
           </div>
           {brands.length ? (
-            <div className="mt-12 flex flex-col gap-6 border-t border-line pt-10 lg:flex-row lg:items-center">
-              <p className="shrink-0 font-display text-lg font-bold leading-tight">
+            <div className="mt-12 grid gap-8 border-t border-line pt-10 lg:grid-cols-[auto_1fr] lg:items-center lg:gap-16">
+              <p className="font-display text-lg font-bold leading-tight">
                 Toutes les grandes marques.<br />
                 <span className="text-muted">Et bien d’autres.</span>
               </p>
-              <ul className="flex flex-wrap items-center gap-x-8 gap-y-5 lg:ml-auto lg:justify-end">
+              <ul className="grid grid-cols-2 gap-x-6 gap-y-5 md:grid-cols-5">
                 {brands.map((brand) => (
-                  <li key={brand.id}>
-                    <Link href={`/reparation/${brand.slug}`} className="text-ink/75 transition-colors hover:text-ink" aria-label={`Réparation ${brand.name}`}>
+                  <li key={brand.id} className="flex md:justify-center">
+                    <Link href={`/reparation/${brand.slug}`} className="flex h-9 items-center text-ink/75 transition-colors hover:text-ink" aria-label={`Réparation ${brand.name}`}>
                       <BrandMark slug={brand.slug} name={brand.name} logoUrl={brand.logo_url} iconClassName="size-6" className="text-[17px]" />
                     </Link>
                   </li>
@@ -199,7 +199,7 @@ export default async function HomePage() {
       </section>
 
       {/* ---------------------------------------------------------- Méthode */}
-      <section className="bg-ink text-white">
+      <section className="bg-charcoal text-white">
         <div className="container-page grid gap-12 py-16 sm:py-24 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
             <p className="eyebrow !text-white">Comment ça marche</p>
@@ -312,12 +312,12 @@ export default async function HomePage() {
 
       {/* ----------------------------------------------------------- Contact */}
       <section className="container-page pb-16 sm:pb-24">
-        <div className="grid overflow-hidden rounded-[22px] bg-brand-strong text-white lg:grid-cols-2">
+        <div className="grid overflow-hidden rounded-[22px] bg-brand-strong text-on-fill lg:grid-cols-2">
           <div className="p-8 sm:p-12">
             <h2 className="text-[32px] font-extrabold leading-[1.08] sm:text-[42px]">
               Votre appareil a un souci ?<br />Parlons-en.
             </h2>
-            <p className="mt-4 max-w-md text-white/85">
+            <p className="mt-4 max-w-md text-on-fill/85">
               Décrivez la panne en deux minutes et recevez votre devis là où vous le souhaitez.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -325,13 +325,13 @@ export default async function HomePage() {
                 Demander un devis
               </ButtonLink>
               {whatsapp ? (
-                <ExternalButton href={whatsapp} target="_blank" rel="noopener noreferrer" size="lg" className="bg-white text-ink hover:bg-white/90" icon={<WhatsappIcon className="size-5 text-whatsapp" />}>
+                <ExternalButton href={whatsapp} target="_blank" rel="noopener noreferrer" size="lg" className="bg-surface text-ink hover:bg-surface/90" icon={<WhatsappIcon className="size-5 text-whatsapp" />}>
                   WhatsApp
                 </ExternalButton>
               ) : null}
             </div>
             {settings.address ? (
-              <p className="mt-8 flex items-start gap-2 text-sm text-white/90">
+              <p className="mt-8 flex items-start gap-2 text-sm text-on-fill/90">
                 <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden />
                 {settings.address}
                 {settings.city ? `, ${settings.city}` : ""}
@@ -348,7 +348,7 @@ export default async function HomePage() {
             />
           ) : (
             <div className="hidden items-end justify-end bg-[radial-gradient(circle_at_70%_30%,rgba(255,255,255,0.22),transparent_60%)] p-12 lg:flex">
-              <p className="max-w-xs text-right font-display text-2xl font-bold leading-snug text-white/90">La vie continue. Votre appareil aussi.</p>
+              <p className="max-w-xs text-right font-display text-2xl font-bold leading-snug text-on-fill/90">La vie continue. Votre appareil aussi.</p>
             </div>
           )}
         </div>

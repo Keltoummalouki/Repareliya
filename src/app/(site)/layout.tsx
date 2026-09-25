@@ -19,7 +19,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
     <>
       <a
         href="#contenu"
-        className="sr-only z-50 rounded-md bg-ink px-4 py-3 text-sm text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+        className="sr-only z-50 rounded-md bg-ink px-4 py-3 text-sm text-on-fill focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
       >
         Aller au contenu
       </a>

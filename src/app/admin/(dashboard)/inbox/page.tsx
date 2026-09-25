@@ -73,7 +73,7 @@ export default async function InboxPage({ searchParams }: PageProps<"/admin/inbo
             {requests.map((r) => {
               const contact = r.preferred_contact === "email" ? r.email : r.preferred_contact === "whatsapp" ? r.whatsapp : r.phone;
               return (
-                <Link key={r.id} href={`/admin/inbox/${r.id}`} className="flex gap-4 px-4 py-4 transition-colors hover:bg-black/[0.02] sm:px-5">
+                <Link key={r.id} href={`/admin/inbox/${r.id}`} className="flex gap-4 px-4 py-4 transition-colors hover:bg-ink/[0.02] sm:px-5">
                   <span className={`mt-2 size-2.5 shrink-0 rounded-full ${r.is_read ? "bg-transparent" : "bg-brand-strong"}`} aria-label={r.is_read ? undefined : "Non lue"} />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">

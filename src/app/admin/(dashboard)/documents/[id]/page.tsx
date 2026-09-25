@@ -139,7 +139,7 @@ export default async function DocumentPage({ params }: PageProps<"/admin/documen
             />
           ) : (
             <div className="space-y-6">
-              <p className="flex items-center gap-2 rounded-xl bg-black/[0.04] px-4 py-3 text-sm text-ink-soft">
+              <p className="flex items-center gap-2 rounded-xl bg-ink/[0.04] px-4 py-3 text-sm text-ink-soft">
                 <Lock className="size-4" aria-hidden />
                 {type === "facture" ? "Facture validée : son contenu est verrouillé. Pour corriger, annulez-la et dupliquez-la." : "Devis annulé : dupliquez-le pour repartir de son contenu."}
               </p>

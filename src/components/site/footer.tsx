@@ -24,7 +24,7 @@ export function Footer({ settings, socials }: { settings: SiteSettings; socials:
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="grid size-10 place-items-center rounded-full border border-line-strong text-ink transition-colors hover:border-ink hover:bg-ink hover:text-white"
+                    className="grid size-10 place-items-center rounded-full border border-line-strong text-ink transition-colors hover:border-ink hover:bg-ink hover:text-on-fill"
                     aria-label={social.label || socialLabel(social.platform)}
                   >
                     <SocialIcon platform={social.platform} className="size-4.5" />

@@ -337,7 +337,7 @@ function CatalogPicker({ onPick }: { onPick: (item: DocumentItem) => void }) {
                 <li key={p.id}>
                   <button
                     type="button"
-                    className="rounded-full bg-ink px-3 py-1 text-sm text-white hover:bg-ink-soft"
+                    className="rounded-full bg-ink px-3 py-1 text-sm text-on-fill hover:bg-ink-soft"
                     onClick={() =>
                       onPick({
                         description: `${p.repair} ${model.brand} ${model.name}${p.quality ? ` (${p.quality})` : ""}`,

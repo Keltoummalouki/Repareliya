@@ -25,7 +25,7 @@
 .date-picker-day.is-outside { color: var(--color-muted); opacity: .6; }
 .date-picker-day.is-today:not(.is-selected) { color: var(--color-brand-strong); background: var(--color-brand-soft); font-weight: 700; }
 .date-picker-day.is-today::after { content: ""; position: absolute; bottom: 4px; width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
-.date-picker-day.is-selected, .date-picker-day.is-selected:hover { color: white; background: var(--color-brand-strong); font-weight: 700; opacity: 1; box-shadow: 0 2px 5px rgb(204 65 25 / .15); }
+.date-picker-day.is-selected, .date-picker-day.is-selected:hover { color: var(--color-on-fill); background: var(--color-brand-strong); font-weight: 700; opacity: 1; box-shadow: 0 2px 5px rgb(204 65 25 / .15); }
 .date-picker-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; min-height: 251px; padding: 5px 0; }
 .date-picker-panel button { padding: 10px 6px; border-radius: 8px; font-size: 12px; cursor: pointer; }
 .date-picker-panel button:hover:not(:disabled) { background: var(--color-bg); }

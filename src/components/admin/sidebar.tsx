@@ -20,6 +20,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Logo } from "@/components/icons";
+import { ThemeToggle } from "@/components/theme";
 import { createClient } from "@/lib/supabase/client";
 
 const NAV = [
@@ -58,13 +59,13 @@ export function AdminSidebar({ email, counts }: { email: string; counts: { reque
             aria-current={active ? "page" : undefined}
             className={clsx(
               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition-colors",
-              active ? "bg-ink text-white" : "text-ink-soft hover:bg-black/[0.05] hover:text-ink",
+              active ? "bg-ink text-on-fill" : "text-ink-soft hover:bg-ink/[0.05] hover:text-ink",
             )}
           >
             <item.icon className={clsx("size-4.5 shrink-0", active ? "text-brand" : "text-muted")} aria-hidden />
             <span className="flex-1">{item.label}</span>
             {count ? (
-              <span className={clsx("rounded-full px-2 py-0.5 text-[11px] font-bold", active ? "bg-brand text-white" : "bg-brand-strong text-white")}>
+              <span className={clsx("rounded-full px-2 py-0.5 text-[11px] font-bold", active ? "bg-brand text-on-fill" : "bg-brand-strong text-on-fill")}>
                 {count}
               </span>
             ) : null}
@@ -76,10 +77,15 @@ export function AdminSidebar({ email, counts }: { email: string; counts: { reque
 
   const footer = (
     <div className="border-t border-line p-3">
-      <Link href="/" target="_blank" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-ink-soft hover:bg-black/[0.05]">
+      <Link href="/" target="_blank" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-ink-soft hover:bg-ink/[0.05]">
         <ExternalLink className="size-4 text-muted" aria-hidden /> Voir le site
       </Link>
-      <button type="button" onClick={logout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-ink-soft hover:bg-black/[0.05]">
+      <ThemeToggle
+        withLabel
+        iconClassName="size-4 text-muted"
+        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-ink-soft hover:bg-ink/[0.05]"
+      />
+      <button type="button" onClick={logout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-ink-soft hover:bg-ink/[0.05]">
         <LogOut className="size-4 text-muted" aria-hidden /> Déconnexion
       </button>
       <p className="truncate px-3 pt-2 text-xs text-muted" title={email}>
@@ -101,7 +107,7 @@ export function AdminSidebar({ email, counts }: { email: string; counts: { reque
       </div>
       {open ? (
         <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-ink/40" onClick={() => setOpen(false)} aria-hidden />
+          <div className="absolute inset-0 bg-scrim" onClick={() => setOpen(false)} aria-hidden />
           <aside className="absolute inset-y-0 left-0 flex w-72 flex-col bg-surface pt-4">
             <div className="mb-4 flex items-center justify-between px-5">
               <Logo className="text-[19px]" />

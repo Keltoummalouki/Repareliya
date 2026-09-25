@@ -88,7 +88,7 @@ export default async function DocumentsPage({ searchParams }: PageProps<"/admin/
               </thead>
               <tbody className="divide-y divide-line">
                 {documents.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-black/[0.02]">
+                  <tr key={doc.id} className="hover:bg-ink/[0.02]">
                     <td className="px-5 py-3">
                       <Link href={`/admin/documents/${doc.id}`} className="font-semibold hover:text-brand-strong">
                         {doc.type === "devis" ? "Devis" : "Facture"} {doc.number ?? <span className="text-muted">(brouillon)</span>}

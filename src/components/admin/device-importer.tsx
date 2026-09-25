@@ -206,11 +206,11 @@ export function DeviceImporter({ brands }: { brands: Brand[] }) {
             ) : null}
           </div>
           <div className="flex flex-wrap items-center gap-2 border-b border-line px-4 py-3">
-            <button type="button" onClick={() => setCategory("")} className={clsx("rounded-full border px-3 py-1 text-sm", !category ? "border-ink bg-ink text-white" : "border-line-strong")}>
+            <button type="button" onClick={() => setCategory("")} className={clsx("rounded-full border px-3 py-1 text-sm", !category ? "border-ink bg-ink text-on-fill" : "border-line-strong")}>
               Tout
             </button>
             {categoriesPresent.map((c) => (
-              <button key={c} type="button" onClick={() => setCategory(c)} className={clsx("rounded-full border px-3 py-1 text-sm", category === c ? "border-ink bg-ink text-white" : "border-line-strong")}>
+              <button key={c} type="button" onClick={() => setCategory(c)} className={clsx("rounded-full border px-3 py-1 text-sm", category === c ? "border-ink bg-ink text-on-fill" : "border-line-strong")}>
                 {CATEGORY_LABEL[c]}
               </button>
             ))}

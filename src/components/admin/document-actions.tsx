@@ -207,7 +207,7 @@ function ActionRow({ icon, label, onClick, disabled, className }: { icon: React.
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={clsx("flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium hover:bg-black/[0.04] disabled:opacity-50", className)}
+      className={clsx("flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium hover:bg-ink/[0.04] disabled:opacity-50", className)}
     >
       {icon}
       {label}
@@ -311,7 +311,7 @@ function SendDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-end bg-ink/40 p-0 sm:place-items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="send-title" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="fixed inset-0 z-50 grid place-items-end bg-scrim p-0 sm:place-items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="send-title" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div ref={dialogRef} className="max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-surface p-5 shadow-(--shadow-float) sm:max-w-lg sm:rounded-2xl sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -323,7 +323,7 @@ function SendDialog({
               {doc.preferred_contact ? " — contact préféré signalé ★" : ""}
             </p>
           </div>
-          <button type="button" onClick={onClose} className="grid size-9 place-items-center rounded-lg hover:bg-black/5" aria-label="Fermer">
+          <button type="button" onClick={onClose} className="grid size-9 place-items-center rounded-lg hover:bg-ink/5" aria-label="Fermer">
             <X className="size-5" />
           </button>
         </div>
@@ -340,12 +340,12 @@ function SendDialog({
                 onClick={() => setChannel(c.key)}
                 className={clsx(
                   "relative flex flex-col items-center gap-1 rounded-xl border px-2 py-2.5 text-xs font-semibold transition-colors",
-                  channel === c.key ? "border-ink bg-ink text-white" : "border-line-strong hover:border-ink",
+                  channel === c.key ? "border-ink bg-ink text-on-fill" : "border-line-strong hover:border-ink",
                 )}
               >
                 {c.icon}
                 {c.label}
-                {isPreferred ? <span className="absolute -right-1 -top-1.5 rounded-full bg-brand-strong px-1.5 text-[10px] text-white">★</span> : null}
+                {isPreferred ? <span className="absolute -right-1 -top-1.5 rounded-full bg-brand-strong px-1.5 text-[10px] text-on-fill">★</span> : null}
               </button>
             );
           })}

@@ -14,9 +14,9 @@
 .custom-select-options { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 5px; scrollbar-width: thin; scrollbar-color: var(--color-line-strong) transparent; }
 .custom-select-option { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 39px; padding: 9px 10px; border-radius: 7px; cursor: pointer; line-height: 1.4; }
 .custom-select-option > span { min-width: 0; overflow-wrap: anywhere; }
-.custom-select-option[data-active="true"] { background: #f1f2ec; }
+.custom-select-option[data-active="true"] { background: var(--color-subtle); }
 .custom-select-option[aria-selected="true"] { color: var(--color-brand-dark); background: var(--color-brand-soft); font-weight: 600; }
-.custom-select-option[aria-selected="true"][data-active="true"] { background: #fbdfd3; }
+.custom-select-option[aria-selected="true"][data-active="true"] { background: var(--color-brand-soft-hover); }
 .custom-select-option[aria-disabled="true"] { color: var(--color-muted); opacity: .6; cursor: not-allowed; background: transparent; }
 .custom-select-group { padding: 11px 10px 5px; font-size: 12px; font-weight: 700; color: var(--color-muted); }
 .custom-select-empty { padding: 20px 12px; text-align: center; font-size: 14px; color: var(--color-muted); overflow-wrap: anywhere; }

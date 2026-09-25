@@ -11,13 +11,13 @@ const base =
   "inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold transition-[background,color,border-color,transform] duration-150 disabled:opacity-60 disabled:pointer-events-none select-none whitespace-nowrap";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-brand-strong text-white hover:bg-brand-dark",
-  dark: "bg-ink text-white hover:bg-ink-soft",
+  primary: "bg-brand-strong text-on-fill hover:bg-brand-dark",
+  dark: "bg-ink text-on-fill hover:bg-ink-soft",
   outline: "border border-line-strong bg-surface text-ink hover:border-ink",
-  ghost: "text-ink hover:bg-black/5",
-  danger: "bg-danger text-white hover:bg-[#8f1c13]",
+  ghost: "text-ink hover:bg-ink/5",
+  danger: "bg-danger text-on-fill hover:bg-[#8f1c13] dark:hover:bg-[#f99d94]",
   whatsapp: "bg-whatsapp text-white hover:bg-[#0d6e3a]",
-  soft: "bg-brand-soft text-brand-dark hover:bg-[#fbd9cc]",
+  soft: "bg-brand-soft text-brand-dark hover:bg-brand-soft-hover",
 };
 
 const sizes: Record<Size, string> = {

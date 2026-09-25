@@ -69,7 +69,7 @@ export function TabLinks({ tabs, active }: { tabs: { href: string; label: string
           )}
         >
           {tab.label}
-          {tab.count ? <span className="rounded-full bg-black/[0.07] px-1.5 text-[11px] font-bold">{tab.count}</span> : null}
+          {tab.count ? <span className="rounded-full bg-ink/[0.07] px-1.5 text-[11px] font-bold">{tab.count}</span> : null}
         </Link>
       ))}
     </nav>

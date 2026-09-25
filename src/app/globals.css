@@ -1,17 +1,23 @@
 @import "tailwindcss";
 
+/* dark: suit data-theme sur <html>, posé avant le rendu par themeScript (src/lib/theme.ts) */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme {
   --color-bg: #f9f9f6;
   --color-surface: #ffffff;
+  --color-subtle: #f1f2ec;
   --color-ink: #202320;
   --color-ink-soft: #3d423b;
   --color-muted: #6b6e67;
+  --color-faint: #9a9d95;
   --color-line: #e4e5df;
   --color-line-strong: #cfd1c8;
   --color-brand: #f15c35;
   --color-brand-strong: #cc4119;
   --color-brand-dark: #a8330f;
   --color-brand-soft: #fdebe4;
+  --color-brand-soft-hover: #fbd9cc;
   --color-success: #1d7a50;
   --color-success-soft: #e3f4ea;
   --color-warning: #9a6200;
@@ -21,6 +27,12 @@
   --color-info: #2456a6;
   --color-info-soft: #e5edfa;
   --color-whatsapp: #128c4a;
+  /* Texte posé sur un aplat plein (ink, brand-strong, danger…) */
+  --color-on-fill: #ffffff;
+  /* Toujours sombre, quel que soit le thème (bandeaux, légendes sur photo) */
+  --color-charcoal: #202320;
+  --color-scrim: rgb(32 35 32 / 0.4);
+  --color-selection: #ffd4c5;
 
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
@@ -30,8 +42,43 @@
   --shadow-float: 0 18px 50px -20px rgb(32 35 32 / 0.35);
 }
 
+/* Thème sombre : réglage de l’appareil par défaut, ou choix du visiteur via le bouton de thème.
+   En sombre, les teintes « strong/dark » deviennent plus claires pour garder le contraste. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #121412;
+  --color-surface: #1b1e1b;
+  --color-subtle: #252924;
+  --color-ink: #ecede8;
+  --color-ink-soft: #c3c6be;
+  --color-muted: #999c93;
+  --color-faint: #6d7169;
+  --color-line: #2c302b;
+  --color-line-strong: #3d423b;
+  --color-brand: #f36b45;
+  --color-brand-strong: #f47a55;
+  --color-brand-dark: #ffa183;
+  --color-brand-soft: #3b2119;
+  --color-brand-soft-hover: #4d2b1f;
+  --color-success: #52c48c;
+  --color-success-soft: #15291e;
+  --color-warning: #e5ab45;
+  --color-warning-soft: #2f2513;
+  --color-danger: #f47c72;
+  --color-danger-soft: #3a1d1a;
+  --color-info: #82acf2;
+  --color-info-soft: #18243a;
+  --color-on-fill: #121412;
+  --color-scrim: rgb(0 0 0 / 0.6);
+  --color-selection: #5c2a1b;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.5);
+  --shadow-float: 0 18px 50px -20px rgb(0 0 0 / 0.7);
+}
+
 @layer base {
   html {
+    color-scheme: light;
     -webkit-text-size-adjust: 100%;
     scroll-padding-top: 96px;
   }
@@ -46,7 +93,7 @@
     letter-spacing: -0.02em;
   }
   ::selection {
-    background: #ffd4c5;
+    background: var(--color-selection);
   }
   :focus-visible {
     outline: 2px solid var(--color-brand-strong);
@@ -118,7 +165,7 @@
     transition: border-color 0.15s, box-shadow 0.15s;
   }
   .field-input::placeholder {
-    color: #9a9d95;
+    color: var(--color-faint);
   }
   .field-input:focus {
     outline: none;
@@ -129,7 +176,7 @@
     border-color: var(--color-danger);
   }
   .field-input:disabled {
-    background: #f3f3ef;
+    background: var(--color-subtle);
     color: var(--color-muted);
   }
   select.field-input {

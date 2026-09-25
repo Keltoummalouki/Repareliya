@@ -80,7 +80,7 @@ export default async function ModelsPage({ searchParams }: PageProps<"/admin/app
             <Search className="size-4 text-muted" aria-hidden />
             <input name="q" defaultValue={q} placeholder="Rechercher un modèle…" className="h-10 w-full bg-transparent text-sm outline-none" aria-label="Rechercher" />
           </div>
-          <button type="submit" className="h-10 rounded-[10px] bg-ink px-4 text-sm font-semibold text-white">
+          <button type="submit" className="h-10 rounded-[10px] bg-ink px-4 text-sm font-semibold text-on-fill">
             Filtrer
           </button>
         </form>

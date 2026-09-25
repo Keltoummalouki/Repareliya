@@ -89,7 +89,7 @@ export function PriceEstimator({
           ) : null}
         </div>
 
-        <div className="bg-[#fbfbf8] p-5 sm:p-8" aria-live="polite">
+        <div className="bg-bg p-5 sm:p-8" aria-live="polite">
           {!model ? (
             <div className="flex h-full min-h-64 flex-col items-center justify-center text-center">
               <span className="grid size-14 place-items-center rounded-2xl bg-brand-soft text-brand-strong">
@@ -154,7 +154,7 @@ export function PriceEstimator({
                         </div>
                         <Link
                           href={`/devis?modele=${model.id}&reparation=${type.id}`}
-                          className="grid size-9 shrink-0 place-items-center rounded-full border border-line-strong text-ink transition-colors hover:border-ink hover:bg-ink hover:text-white"
+                          className="grid size-9 shrink-0 place-items-center rounded-full border border-line-strong text-ink transition-colors hover:border-ink hover:bg-ink hover:text-on-fill"
                           aria-label={`Demander un devis : ${type.name}`}
                         >
                           <ArrowUpRight className="size-4" aria-hidden />

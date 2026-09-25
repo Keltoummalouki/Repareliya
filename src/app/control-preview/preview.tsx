@@ -15,10 +15,10 @@ export function ControlsPreview() {
       <Field label="Date facultative" htmlFor="optional-date"><DatePicker id="optional-date" name="optional_date" /></Field>
       <Field label="Note" htmlFor="note"><Input id="note" name="note" /></Field>
       <p>Valeurs contrôlées : <output>{value} / {date}</output></p>
-      <div className="flex gap-4"><button className="rounded-lg bg-ink px-4 py-2 text-white" type="submit">Vérifier le formulaire</button><button className="rounded-lg border px-4 py-2" type="reset">Réinitialiser</button></div>
+      <div className="flex gap-4"><button className="rounded-lg bg-ink px-4 py-2 text-on-fill" type="submit">Vérifier le formulaire</button><button className="rounded-lg border px-4 py-2" type="reset">Réinitialiser</button></div>
       <output aria-label="Résultat du formulaire">{submitted}</output>
     </form>
-    <button className="rounded-lg bg-brand-strong px-4 py-2 text-white" onClick={()=>setModal(true)}>Ouvrir la fenêtre</button>
+    <button className="rounded-lg bg-brand-strong px-4 py-2 text-on-fill" onClick={()=>setModal(true)}>Ouvrir la fenêtre</button>
     {modal ? <Dialog title="Vérification en fenêtre" onClose={()=>setModal(false)}><div className="space-y-5"><Field label="Catégorie dans la fenêtre" htmlFor="modal-select"><Select id="modal-select" defaultValue="a"><option value="a">Téléphone</option><option value="b">Tablette</option></Select></Field><Field label="Date de réalisation" htmlFor="modal-date"><DatePicker id="modal-date" defaultValue="2026-09-25" /></Field></div></Dialog>:null}
   </main>;
 }

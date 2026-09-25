@@ -96,7 +96,7 @@ export default async function AdminHome() {
               <ul className="divide-y divide-line">
                 {recentRequests.data.map((r) => (
                   <li key={r.id}>
-                    <Link href={`/admin/inbox/${r.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-black/[0.02]">
+                    <Link href={`/admin/inbox/${r.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-ink/[0.02]">
                       <span className={`size-2 shrink-0 rounded-full ${r.is_read ? "bg-transparent" : "bg-brand-strong"}`} aria-hidden />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-semibold">
@@ -134,7 +134,7 @@ export default async function AdminHome() {
               <ul className="divide-y divide-line">
                 {recentDocs.data.map((d) => (
                   <li key={d.id}>
-                    <Link href={`/admin/documents/${d.id}`} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-black/[0.02]">
+                    <Link href={`/admin/documents/${d.id}`} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-ink/[0.02]">
                       <span className="min-w-0">
                         <span className="block truncate font-semibold">{d.customer_name}</span>
                         <span className="block text-xs text-muted">

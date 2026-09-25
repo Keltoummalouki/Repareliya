@@ -102,7 +102,7 @@ export function ModelsTable({ rows }: { rows: Row[] }) {
             {rows.map((row) => {
               const r = { ...row, ...local[row.id] };
               return (
-                <tr key={r.id} className={r.is_active ? "hover:bg-black/[0.02]" : "bg-black/[0.02] text-muted"}>
+                <tr key={r.id} className={r.is_active ? "hover:bg-ink/[0.02]" : "bg-ink/[0.02] text-muted"}>
                   <td className="px-4 py-2.5">
                     <input type="checkbox" aria-label={`Sélectionner ${r.name}`} className="size-4 accent-brand-strong" checked={selected.has(r.id)} onChange={() => toggle(r.id)} />
                   </td>

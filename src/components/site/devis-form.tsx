@@ -293,7 +293,7 @@ export function DevisForm({
                   <img src={photo.url} alt={`Photo ${index + 1}`} className="size-full object-cover" />
                   <button
                     type="button"
-                    className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-ink/80 text-white"
+                    className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-charcoal/80 text-white"
                     aria-label={`Retirer la photo ${index + 1}`}
                     onClick={() => setPhotos(photos.filter((_, i) => i !== index))}
                   >
@@ -341,7 +341,7 @@ export function DevisForm({
                 key={m.value}
                 className={clsx(
                   "flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-3 transition-colors",
-                  method === m.value ? "border-ink bg-ink text-white" : "border-line-strong bg-surface hover:border-ink",
+                  method === m.value ? "border-ink bg-ink text-on-fill" : "border-line-strong bg-surface hover:border-ink",
                 )}
               >
                 <input
@@ -355,7 +355,7 @@ export function DevisForm({
                 <span className={clsx(method === m.value ? "text-brand" : m.value === "whatsapp" ? "text-whatsapp" : "text-ink")}>{m.icon}</span>
                 <span>
                   <span className="block text-[15px] font-semibold">{m.label}</span>
-                  <span className={clsx("block text-xs", method === m.value ? "text-white/70" : "text-muted")}>{m.hint}</span>
+                  <span className={clsx("block text-xs", method === m.value ? "text-on-fill/70" : "text-muted")}>{m.hint}</span>
                 </span>
               </label>
             ))}

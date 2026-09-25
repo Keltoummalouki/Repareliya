@@ -80,7 +80,7 @@ export function ReviewCard({ review }: { review: ReviewCardData }) {
         {review.photoUrl ? (
           <img src={review.photoUrl} alt="" className="size-9 rounded-full" referrerPolicy="no-referrer" />
         ) : (
-          <span className="grid size-9 place-items-center rounded-full bg-ink font-display text-sm font-bold text-white">
+          <span className="grid size-9 place-items-center rounded-full bg-ink font-display text-sm font-bold text-on-fill">
             {review.author_name.slice(0, 1).toUpperCase()}
           </span>
         )}
@@ -114,16 +114,16 @@ export function RealisationCard({ item }: { item: RealisationCardData }) {
   const hasBeforeAfter = Boolean(item.before_image_url && item.after_image_url);
   return (
     <article className="group card overflow-hidden">
-      <div className="relative aspect-[4/3] overflow-hidden bg-[#ecece6]">
+      <div className="relative aspect-[4/3] overflow-hidden bg-subtle">
         {hasBeforeAfter ? (
           <div className="grid h-full grid-cols-2">
             <figure className="relative">
               <img src={item.before_image_url!} alt={`${item.title} — avant`} className="size-full object-cover" loading="lazy" />
-              <figcaption className="absolute bottom-2 left-2 rounded-full bg-ink/85 px-2 py-0.5 text-[11px] font-semibold text-white">Avant</figcaption>
+              <figcaption className="absolute bottom-2 left-2 rounded-full bg-charcoal/85 px-2 py-0.5 text-[11px] font-semibold text-white">Avant</figcaption>
             </figure>
-            <figure className="relative border-l-2 border-white">
+            <figure className="relative border-l-2 border-surface">
               <img src={item.after_image_url!} alt={`${item.title} — après`} className="size-full object-cover" loading="lazy" />
-              <figcaption className="absolute bottom-2 left-2 rounded-full bg-brand-strong px-2 py-0.5 text-[11px] font-semibold text-white">Après</figcaption>
+              <figcaption className="absolute bottom-2 left-2 rounded-full bg-brand-strong px-2 py-0.5 text-[11px] font-semibold text-on-fill">Après</figcaption>
             </figure>
           </div>
         ) : cover ? (
@@ -167,7 +167,7 @@ export function AccessoryCard({ item, currency }: { item: AccessoryCardData; cur
   const compare = item.compare_at_price === null ? null : Number(item.compare_at_price);
   return (
     <article className="card group flex flex-col overflow-hidden">
-      <div className="relative aspect-square overflow-hidden bg-[#f1f1ec]">
+      <div className="relative aspect-square overflow-hidden bg-subtle">
         {item.image_url ? (
           <img src={item.image_url} alt={item.name} className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" loading="lazy" />
         ) : (
@@ -191,7 +191,7 @@ export function AccessoryCard({ item, currency }: { item: AccessoryCardData; cur
           {item.stock_status !== "rupture" ? (
             <Link
               href={`/devis?accessoire=${item.id}`}
-              className="inline-flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-ink-soft"
+              className="inline-flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-on-fill transition-colors hover:bg-ink-soft"
             >
               Réserver <ArrowUpRight className="size-3.5" aria-hidden />
             </Link>

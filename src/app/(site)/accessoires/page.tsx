@@ -53,7 +53,7 @@ function FilterLink({ href, active, children }: { href: string; active: boolean;
       aria-current={active ? "page" : undefined}
       className={clsx(
         "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-        active ? "border-ink bg-ink text-white" : "border-line-strong bg-surface hover:border-ink",
+        active ? "border-ink bg-ink text-on-fill" : "border-line-strong bg-surface hover:border-ink",
       )}
     >
       {children}

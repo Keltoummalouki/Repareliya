@@ -28,7 +28,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { IconType } from "react-icons";
-import { FaLinkedin } from "react-icons/fa";
+import { BsNintendoSwitch } from "react-icons/bs";
+import { FaLinkedin, FaMicrosoft } from "react-icons/fa";
 import {
   SiApple,
   SiFacebook,
@@ -101,6 +102,8 @@ const BRAND_ICONS: Record<string, IconType> = {
   motorola: SiMotorola,
   sony: SiPlaystation,
   playstation: SiPlaystation,
+  nintendo: BsNintendoSwitch,
+  microsoft: FaMicrosoft,
   valve: SiSteam,
 };
 
@@ -150,15 +153,15 @@ export const SOCIAL_PLATFORMS: { value: string; label: string; icon: IconType | 
   { value: "whatsapp", label: "WhatsApp", icon: SiWhatsapp, color: "#128c4a" },
   { value: "instagram", label: "Instagram", icon: SiInstagram, color: "#d62976" },
   { value: "facebook", label: "Facebook", icon: SiFacebook, color: "#1877f2" },
-  { value: "tiktok", label: "TikTok", icon: SiTiktok, color: "#111111" },
+  { value: "tiktok", label: "TikTok", icon: SiTiktok, color: "var(--color-ink)" },
   { value: "snapchat", label: "Snapchat", icon: SiSnapchat, color: "#e8c900" },
   { value: "youtube", label: "YouTube", icon: SiYoutube, color: "#ff0000" },
-  { value: "x", label: "X (Twitter)", icon: SiX, color: "#111111" },
+  { value: "x", label: "X (Twitter)", icon: SiX, color: "var(--color-ink)" },
   { value: "linkedin", label: "LinkedIn", icon: FaLinkedin, color: "#0a66c2" },
-  { value: "threads", label: "Threads", icon: SiThreads, color: "#111111" },
+  { value: "threads", label: "Threads", icon: SiThreads, color: "var(--color-ink)" },
   { value: "telegram", label: "Telegram", icon: SiTelegram, color: "#229ed9" },
   { value: "google", label: "Google Maps", icon: SiGooglemaps, color: "#1a73e8" },
-  { value: "autre", label: "Autre lien", icon: Globe, color: "#202320" },
+  { value: "autre", label: "Autre lien", icon: Globe, color: "var(--color-ink)" },
 ];
 
 export function SocialIcon({ platform, className }: { platform: string; className?: string }) {
@@ -173,17 +176,13 @@ export function socialLabel(platform: string) {
 export { SiWhatsapp as WhatsappIcon, SiGoogle as GoogleIcon, SiSony as SonyIcon, SiValve as ValveIcon };
 
 export function Logo({ className, name = "Repareliya" }: { className?: string; name?: string }) {
+  // Une version par thème, masquée en CSS : en chargement différé (par défaut),
+  // le navigateur ne télécharge que celle qui est affichée
+  const common = { width: 2172, height: 724, sizes: "176px" };
   return (
     <span className={twMerge("inline-flex max-w-full align-middle text-[22px]", className)}>
-      <Image
-        src="/images/logo.png"
-        alt={name}
-        width={2172}
-        height={724}
-        sizes="176px"
-        loading="eager"
-        className="h-auto w-[8em] max-w-full"
-      />
+      <Image {...common} src="/images/logo.png" alt={name} className="h-auto w-[8em] max-w-full dark:hidden" />
+      <Image {...common} src="/images/logo-dark.png" alt={name} className="hidden h-auto w-[8em] max-w-full dark:block" />
     </span>
   );
 }

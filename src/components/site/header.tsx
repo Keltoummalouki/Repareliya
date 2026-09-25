@@ -6,9 +6,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo, WhatsappIcon } from "@/components/icons";
-import { ButtonLink, ExternalButton } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme";
+import { ButtonLink, ExternalButton, buttonClass } from "@/components/ui/button";
 
 const NAV = [
+  { href: "/", label: "Accueil" },
   { href: "/tarifs", label: "Tarifs" },
   { href: "/accessoires", label: "Accessoires" },
   { href: "/realisations", label: "Réalisations" },
@@ -40,7 +42,7 @@ export function Header({
   return (
     <>
       {announcement ? (
-        <div className="bg-ink px-4 py-2 text-center text-[13px] font-medium text-white">{announcement}</div>
+        <div className="bg-charcoal px-4 py-2 text-center text-[13px] font-medium text-white">{announcement}</div>
       ) : null}
       <header className="sticky top-0 z-40 border-b border-line bg-bg/90 backdrop-blur-lg">
         <div className="container-page flex h-[72px] items-center justify-between gap-6">
@@ -54,7 +56,9 @@ export function Header({
                 href={item.href}
                 className={clsx(
                   "relative py-2 after:absolute after:inset-x-0 after:bottom-0.5 after:h-0.5 after:origin-left after:bg-brand after:transition-transform",
-                  pathname.startsWith(item.href) ? "after:scale-x-100" : "after:scale-x-0 hover:after:scale-x-100",
+                  (item.href === "/" ? pathname === "/" : pathname.startsWith(item.href))
+                    ? "after:scale-x-100"
+                    : "after:scale-x-0 hover:after:scale-x-100",
                 )}
               >
                 {item.label}
@@ -62,6 +66,7 @@ export function Header({
             ))}
           </nav>
           <div className="flex items-center gap-2">
+            <ThemeToggle className="hidden size-10 place-items-center rounded-full border border-line-strong text-ink transition-colors hover:border-ink sm:grid" />
             {phoneHref ? (
               <a
                 href={phoneHref}
@@ -135,6 +140,7 @@ export function Header({
                   Appeler
                 </ExternalButton>
               ) : null}
+              <ThemeToggle withLabel className={buttonClass("outline", "lg")} />
             </div>
           </nav>
         </div>

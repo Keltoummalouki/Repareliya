@@ -57,7 +57,7 @@ export function ImageUpload({
             <button
               type="button"
               onClick={() => onChange(null)}
-              className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-ink/80 text-white"
+              className="absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-charcoal/80 text-white"
               aria-label={`Retirer : ${label}`}
             >
               <X className="size-4" />
@@ -97,7 +97,7 @@ export function MultiImageUpload({ value, onChange, folder, label = "Galerie" }:
         {value.map((url, i) => (
           <div key={url} className="relative size-24 overflow-hidden rounded-xl border border-line">
             <img src={url} alt={`Image ${i + 1}`} className="size-full object-cover" />
-            <button type="button" className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-ink/80 text-white" aria-label={`Retirer l’image ${i + 1}`} onClick={() => onChange(value.filter((u) => u !== url))}>
+            <button type="button" className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-charcoal/80 text-white" aria-label={`Retirer l’image ${i + 1}`} onClick={() => onChange(value.filter((u) => u !== url))}>
               <X className="size-3.5" />
             </button>
           </div>

@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Manrope } from "next/font/google";
-import { Toaster } from "sonner";
+import { ThemeColorSync, ThemedToaster } from "@/components/theme";
 import { siteUrl } from "@/lib/env";
+import { DARK_QUERY, THEME_COLORS, themeScript } from "@/lib/theme";
 import "./globals.css";
 
 const dmSans = DM_Sans({ variable: "--font-dm-sans", subsets: ["latin"], display: "swap" });
@@ -14,21 +15,30 @@ export const metadata: Metadata = {
     template: "%s · Repareliya",
   },
   description:
-    "Écran cassé, batterie fatiguée, console en panne ? Repareliya répare vos smartphones, tablettes, ordinateurs et consoles. Demandez votre devis en ligne.",
+    "Écran cassé, batterie fatiguée, console en panne ? Repareliya répare vos smartphones, tablettes, ordinateurs et consoles. Demandez votre devis en ligne.",
   applicationName: "Repareliya",
   openGraph: { type: "website", locale: "fr_FR", siteName: "Repareliya" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f9f9f6",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: THEME_COLORS.light },
+    { media: DARK_QUERY, color: THEME_COLORS.dark },
+  ],
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="fr" className={`${dmSans.variable} ${manrope.variable} h-full antialiased`}>
+    // data-theme est posé par themeScript avant l’hydratation
+    <html lang="fr" className={`${dmSans.variable} ${manrope.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full flex flex-col">
         {children}
-        <Toaster position="top-center" richColors closeButton />
+        <ThemedToaster position="top-center" richColors closeButton />
+        <ThemeColorSync />
       </body>
     </html>
   );

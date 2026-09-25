@@ -73,7 +73,7 @@ export default async function PublicDocumentPage({ params }: PageProps<"/d/[toke
           </p>
         ) : null}
         {doc.status === "annule" ? (
-          <p className="mt-6 rounded-xl bg-black/5 px-4 py-3 font-semibold">Ce document a été annulé.</p>
+          <p className="mt-6 rounded-xl bg-ink/5 px-4 py-3 font-semibold">Ce document a été annulé.</p>
         ) : null}
         {doc.status === "paye" ? (
           <p className="mt-6 flex items-center gap-2 rounded-xl bg-success-soft px-4 py-3 font-semibold text-success">
@@ -98,7 +98,7 @@ export default async function PublicDocumentPage({ params }: PageProps<"/d/[toke
               </li>
             ))}
           </ul>
-          <div className="space-y-1 border-t border-line bg-[#fbfbf8] px-5 py-4">
+          <div className="space-y-1 border-t border-line bg-bg px-5 py-4">
             {rate > 0 ? (
               <>
                 <p className="flex justify-between text-sm text-muted">

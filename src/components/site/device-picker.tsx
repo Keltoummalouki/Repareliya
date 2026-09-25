@@ -31,7 +31,7 @@ export function CategoryTabs({
             className={clsx(
               "flex items-center gap-2 border text-left font-semibold transition-colors",
               compact ? "h-10 whitespace-nowrap rounded-full px-3.5 text-[13px]" : "min-h-14 rounded-xl px-3 py-3 text-sm",
-              active ? "border-ink bg-ink text-white" : "border-line-strong bg-surface hover:border-ink",
+              active ? "border-ink bg-ink text-on-fill" : "border-line-strong bg-surface hover:border-ink",
             )}
           >
             <CategoryIcon icon={category.icon} className={clsx("shrink-0", compact ? "size-4.5" : "size-5.5", active ? "text-brand" : "text-ink")} />
@@ -122,7 +122,7 @@ export function ModelSearch({
           placeholder={`Rechercher parmi ${models.length} modèles…`}
           aria-controls={listId}
           aria-label="Rechercher un modèle"
-          className="h-11 w-full bg-transparent text-[15px] outline-none placeholder:text-[#9a9d95]"
+          className="h-11 w-full bg-transparent text-[15px] outline-none placeholder:text-faint"
         />
       </div>
       <ul id={listId} role="listbox" aria-label="Modèles" className="max-h-72 overflow-y-auto p-1.5">
@@ -135,7 +135,7 @@ export function ModelSearch({
                 onClick={() => onChange(model)}
                 className={clsx(
                   "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-[15px] transition-colors",
-                  active ? "bg-ink text-white" : "hover:bg-black/[0.04]",
+                  active ? "bg-ink text-on-fill" : "hover:bg-ink/[0.04]",
                 )}
               >
                 <span>
@@ -144,7 +144,7 @@ export function ModelSearch({
                     <span className="ml-2 rounded-full bg-brand-soft px-2 py-0.5 text-[11px] font-semibold text-brand-dark">Populaire</span>
                   ) : null}
                 </span>
-                <span className={clsx("text-xs", active ? "text-white/70" : "text-muted")}>{model.release_year ?? ""}</span>
+                <span className={clsx("text-xs", active ? "text-on-fill/70" : "text-muted")}>{model.release_year ?? ""}</span>
               </button>
             </li>
           );

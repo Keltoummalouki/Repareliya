@@ -189,7 +189,7 @@ export default async function RequestPage({ params }: PageProps<"/admin/inbox/[i
               <ul className="divide-y divide-line">
                 {documents.map((doc) => (
                   <li key={doc.id}>
-                    <Link href={`/admin/documents/${doc.id}`} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-black/[0.02]">
+                    <Link href={`/admin/documents/${doc.id}`} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-ink/[0.02]">
                       <span>
                         <span className="block font-semibold">
                           {doc.type === "devis" ? "Devis" : "Facture"} {doc.number ?? "(brouillon)"}

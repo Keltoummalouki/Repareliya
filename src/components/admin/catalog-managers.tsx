@@ -210,7 +210,7 @@ export function CategoriesManager({ categories }: { categories: Category[] }) {
                     type="button"
                     aria-pressed={values.icon === icon}
                     onClick={() => setValues({ ...values, icon })}
-                    className={`grid size-11 place-items-center rounded-xl border ${values.icon === icon ? "border-ink bg-ink text-white" : "border-line-strong"}`}
+                    className={`grid size-11 place-items-center rounded-xl border ${values.icon === icon ? "border-ink bg-ink text-on-fill" : "border-line-strong"}`}
                     aria-label={icon}
                   >
                     <CategoryIcon icon={icon} className="size-5" />
@@ -319,7 +319,7 @@ export function RepairTypesManager({ types, categories }: { types: RepairType[];
                     aria-pressed={values.icon === icon}
                     aria-label={icon}
                     onClick={() => setValues({ ...values, icon })}
-                    className={`grid size-10 place-items-center rounded-xl border ${values.icon === icon ? "border-ink bg-ink text-white" : "border-line-strong"}`}
+                    className={`grid size-10 place-items-center rounded-xl border ${values.icon === icon ? "border-ink bg-ink text-on-fill" : "border-line-strong"}`}
                   >
                     <RepairIcon icon={icon} className="size-4.5" />
                   </button>
