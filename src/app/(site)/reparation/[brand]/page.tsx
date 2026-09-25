@@ -38,7 +38,7 @@ export default async function BrandPage({ params }: PageProps<"/reparation/[bran
       <nav aria-label="Fil d’Ariane" className="text-sm text-muted">
         <Link href="/tarifs" className="hover:text-ink">Tarifs</Link> <span aria-hidden>/</span> <span className="text-ink">{brand.name}</span>
       </nav>
-      <div className="mt-6 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div data-reveal="heading" className="mt-6 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
           <BrandMark slug={brand.slug} name={brand.name} logoUrl={brand.logo_url} iconClassName="size-9" className="text-2xl" />
           <h1 className="mt-5 text-4xl font-extrabold sm:text-5xl">Réparation {brand.name}</h1>
@@ -52,7 +52,7 @@ export default async function BrandPage({ params }: PageProps<"/reparation/[bran
       {[...groups.entries()].map(([key, group]) => (
         <section key={key} className="mt-12">
           <h2 className="text-xl font-bold">{group.name}</h2>
-          <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <ul data-reveal="stagger" className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {group.models.map((model) => (
               <li key={model.id}>
                 <Link

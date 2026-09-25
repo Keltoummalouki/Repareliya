@@ -28,11 +28,12 @@ export default async function ModelPage({ params }: PageProps<"/reparation/[bran
   const { brand, model, prices } = page;
   const full = `${brand.name} ${model.name}`;
   const categoryId = model.category_id;
-  const types = repairTypes.filter((t) => !t.category_ids.length || t.category_ids.includes(categoryId));
-  const sorted = [
-    ...types.filter((t) => prices.some((p) => p.repair_type_id === t.id && p.price !== null)),
-    ...types.filter((t) => !prices.some((p) => p.repair_type_id === t.id && p.price !== null)),
-  ];
+  // Seules les réparations chiffrées sont listées : une ligne « Sur devis » laisserait croire
+  // qu’elle fait partie du devis demandé.
+  const rows = repairTypes
+    .filter((t) => !t.category_ids.length || t.category_ids.includes(categoryId))
+    .map((type) => ({ type, prices: prices.filter((p) => p.repair_type_id === type.id && p.price !== null) }))
+    .filter((r) => r.prices.length);
   const whatsapp = whatsappLink(settings.whatsapp || settings.phone, `Bonjour, j’aimerais un devis pour mon ${full}.`, settings.default_country);
 
   return (
@@ -42,16 +43,17 @@ export default async function ModelPage({ params }: PageProps<"/reparation/[bran
         <Link href={`/reparation/${brand.slug}`} className="hover:text-ink">{brand.name}</Link> <span aria-hidden>/</span>{" "}
         <span className="text-ink">{model.name}</span>
       </nav>
-      <div className="mt-6 grid gap-10 lg:grid-cols-[1fr_1.4fr]">
-        <div className="lg:sticky lg:top-28 lg:self-start">
+      <div className="mt-6 grid grid-cols-1 gap-8 sm:gap-10 lg:grid-cols-[1fr_1.4fr]">
+        <div data-reveal="heading" className="lg:sticky lg:top-28 lg:self-start">
           <p className="eyebrow">{model.device_categories?.name}</p>
           <h1 className="mt-4 text-4xl font-extrabold leading-[1.05] sm:text-5xl">Réparation {full}</h1>
           <p className="mt-4 max-w-md leading-relaxed text-ink-soft">
-            Écran, batterie, connecteur de charge… Voici nos tarifs pour votre {full}. Le prix final est confirmé après diagnostic,
-            avant toute intervention.
+            {rows.length
+              ? `Écran, batterie, connecteur de charge… Voici nos tarifs pour votre ${full}. Le prix final est confirmé après diagnostic, avant toute intervention.`
+              : `Écran, batterie, connecteur de charge… Nous réparons votre ${full}. Demandez un devis : le prix vous est confirmé avant toute intervention.`}
           </p>
           {model.image_url ? <img src={model.image_url} alt={full} className="mt-6 max-h-64 w-auto" /> : null}
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-6 grid gap-3 sm:mt-8 sm:flex sm:flex-wrap">
             <ButtonLink href={`/devis?modele=${model.id}`} icon={<ArrowUpRight className="size-4" />}>
               Demander un devis
             </ButtonLink>
@@ -62,17 +64,16 @@ export default async function ModelPage({ params }: PageProps<"/reparation/[bran
             ) : null}
           </div>
         </div>
-        <ul className="card divide-y divide-line self-start">
-          {sorted.map((type) => {
-            const typePrices = prices.filter((p) => p.repair_type_id === type.id && p.price !== null);
-            return (
-              <li key={type.id} className="flex items-center gap-4 p-4 sm:p-5">
-                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand-strong">
+        {rows.length ? (
+          <ul data-reveal="stagger" className="card divide-y divide-line self-start">
+            {rows.map(({ type, prices: typePrices }) => (
+              <li key={type.id} className="relative flex items-center gap-3 p-4 transition-colors hover:bg-bg sm:gap-4 sm:p-5">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand-strong sm:size-11">
                   <RepairIcon icon={type.icon} className="size-5" />
                 </span>
                 <div className="min-w-0 flex-1">
                   <h2 className="font-bold">{type.name}</h2>
-                  {type.description ? <p className="mt-0.5 text-sm text-muted">{type.description}</p> : null}
+                  {type.description ? <p className="mt-0.5 line-clamp-2 text-sm text-muted sm:line-clamp-none">{type.description}</p> : null}
                   {typePrices.find((p) => p.duration) ? (
                     <p className="mt-1 flex items-center gap-1 text-xs text-muted">
                       <Clock className="size-3" aria-hidden /> {typePrices.find((p) => p.duration)?.duration}
@@ -80,27 +81,37 @@ export default async function ModelPage({ params }: PageProps<"/reparation/[bran
                   ) : null}
                 </div>
                 <div className="text-right">
-                  {typePrices.length ? (
-                    typePrices.map((p) => (
-                      <p key={p.id} className="whitespace-nowrap">
-                        {p.quality ? <span className="mr-1.5 text-xs text-muted">{p.quality}</span> : null}
-                        <span className="font-display text-lg font-extrabold">
-                          {p.price_is_from ? <span className="text-xs font-semibold text-muted">dès </span> : null}
-                          {formatMoney(p.price, settings.currency)}
-                        </span>
-                      </p>
-                    ))
-                  ) : (
-                    <span className="text-sm font-medium text-muted">Sur devis</span>
-                  )}
-                  <Link href={`/devis?modele=${model.id}&reparation=${type.id}`} className="mt-1 block text-xs font-semibold text-brand-strong underline underline-offset-2">
+                  {typePrices.map((p) => (
+                    <p key={p.id} className="whitespace-nowrap">
+                      {p.quality ? <span className="mr-1.5 text-xs text-muted">{p.quality}</span> : null}
+                      <span className="font-display text-lg font-extrabold">
+                        {p.price_is_from ? <span className="text-xs font-semibold text-muted">dès </span> : null}
+                        {formatMoney(p.price, settings.currency)}
+                      </span>
+                    </p>
+                  ))}
+                  {/* Lien étiré : toute la ligne mène au devis de cette réparation */}
+                  <Link
+                    href={`/devis?modele=${model.id}&reparation=${type.id}`}
+                    className="mt-1 block text-xs font-semibold text-brand-strong underline underline-offset-2 after:absolute after:inset-0"
+                  >
                     Devis
                   </Link>
                 </div>
               </li>
-            );
-          })}
-        </ul>
+            ))}
+          </ul>
+        ) : (
+          <div data-reveal="up" className="card self-start p-6 sm:p-8">
+            <span className="grid size-11 place-items-center rounded-xl bg-brand-soft text-brand-strong">
+              <RepairIcon icon="search" className="size-5" />
+            </span>
+            <h2 className="mt-4 text-xl font-bold">Pas encore de tarif en ligne pour ce modèle</h2>
+            <p className="mt-2 max-w-md leading-relaxed text-muted">
+              Décrivez la panne dans une demande de devis : nous vous répondons avec un prix précis, gratuitement et sans engagement.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

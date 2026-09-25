@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { Menu, Phone, X } from "lucide-react";
+import { ChevronRight, Menu, Phone, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -31,6 +31,7 @@ export function Header({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -45,7 +46,7 @@ export function Header({
         <div className="bg-charcoal px-4 py-2 text-center text-[13px] font-medium text-white">{announcement}</div>
       ) : null}
       <header className="sticky top-0 z-40 border-b border-line bg-bg/90 backdrop-blur-lg">
-        <div className="container-page flex h-[72px] items-center justify-between gap-6">
+        <div className="container-page flex h-16 items-center justify-between gap-6 sm:h-[72px]">
           <Link href="/" aria-label={`${businessName}, accueil`} onClick={() => setOpen(false)}>
             <Logo name={businessName} />
           </Link>
@@ -56,7 +57,7 @@ export function Header({
                 href={item.href}
                 className={clsx(
                   "relative py-2 after:absolute after:inset-x-0 after:bottom-0.5 after:h-0.5 after:origin-left after:bg-brand after:transition-transform",
-                  (item.href === "/" ? pathname === "/" : pathname.startsWith(item.href))
+                  isActive(item.href)
                     ? "after:scale-x-100"
                     : "after:scale-x-0 hover:after:scale-x-100",
                 )}
@@ -107,7 +108,7 @@ export function Header({
       </header>
       {open ? (
         <div id="mobile-menu" className="fixed inset-0 z-50 overflow-y-auto bg-bg lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
-          <div className="container-page flex h-[72px] items-center justify-between border-b border-line">
+          <div className="container-page flex h-16 items-center justify-between border-b border-line sm:h-[72px]">
             <Link href="/" aria-label={`${businessName}, accueil`} onClick={() => setOpen(false)}>
               <Logo name={businessName} />
             </Link>
@@ -115,15 +116,20 @@ export function Header({
               <X className="size-5" />
             </button>
           </div>
-          <nav aria-label="Navigation mobile" className="container-page flex flex-col py-4">
+          <nav aria-label="Navigation mobile" className="container-page flex flex-col pb-[max(24px,env(safe-area-inset-bottom))] pt-2">
             {NAV.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="border-b border-line py-4 font-display text-2xl font-bold"
+                aria-current={isActive(item.href) ? "page" : undefined}
+                className={clsx(
+                  "flex items-center justify-between border-b border-line py-4 font-display text-2xl font-bold",
+                  isActive(item.href) && "text-brand-strong",
+                )}
               >
                 {item.label}
+                <ChevronRight className={clsx("size-5", isActive(item.href) ? "text-brand-strong" : "text-faint")} aria-hidden />
               </Link>
             ))}
             <div className="mt-6 grid gap-3">

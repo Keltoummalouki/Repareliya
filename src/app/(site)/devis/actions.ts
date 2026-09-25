@@ -5,9 +5,10 @@ import { after } from "next/server";
 import { z } from "zod";
 import { getSiteSettings } from "@/lib/data/public";
 import { emailLayout, escapeHtml, isEmailConfigured, sendEmail } from "@/lib/email";
-import { formatMoney, toE164 } from "@/lib/format";
+import { isSupportedCountry } from "libphonenumber-js";
+import { formatMoney, toValidE164 } from "@/lib/format";
 import { contactMethodLabel } from "@/lib/contact";
-import { ipHash, submittedTooFast } from "@/lib/request-guard";
+import { ipHash, submittedTooFast, verifyTurnstile } from "@/lib/request-guard";
 import { createServiceClient } from "@/lib/supabase/server";
 import { siteUrl } from "@/lib/env";
 
@@ -30,12 +31,21 @@ const uuid = z
   .optional()
   .or(z.literal("").transform(() => undefined));
 
+// Indicatif choisi à côté d'un numéro ; inconnu → pays par défaut du site
+const countryCode = z
+  .string()
+  .refine((code) => isSupportedCountry(code))
+  .optional()
+  .catch(undefined);
+
 const schema = z.object({
   kind: z.enum(["devis", "contact", "accessoire"]).default("devis"),
   customer_name: z.string().trim().min(2, "Indiquez votre nom.").max(100, "Nom trop long."),
   preferred_contact: z.enum(["telephone", "whatsapp", "email"], { message: "Choisissez comment vous préférez être contacté." }),
   phone: optionalText(40),
+  phone_country: countryCode,
   whatsapp: optionalText(40),
+  whatsapp_country: countryCode,
   email: optionalText(160),
   category_id: uuid,
   model_id: uuid,
@@ -65,7 +75,9 @@ export async function submitRequest(_prev: SubmitRequestState, formData: FormDat
     customer_name: formData.get("customer_name"),
     preferred_contact: formData.get("preferred_contact") ?? undefined,
     phone: formData.get("phone") ?? undefined,
+    phone_country: formData.get("phone_country") ?? undefined,
     whatsapp: formData.get("whatsapp") ?? undefined,
+    whatsapp_country: formData.get("whatsapp_country") ?? undefined,
     email: formData.get("email") ?? undefined,
     category_id: formData.get("category_id") ?? undefined,
     model_id: formData.get("model_id") ?? undefined,
@@ -89,20 +101,17 @@ export async function submitRequest(_prev: SubmitRequestState, formData: FormDat
   const fieldErrors: Record<string, string> = {};
 
   // Coordonnées : le moyen de contact préféré est obligatoire, les autres facultatifs
-  const phone = input.phone ? toE164(input.phone, country) : null;
-  const whatsapp = input.whatsapp ? toE164(input.whatsapp, country) : null;
+  const phone = input.phone ? toValidE164(input.phone, input.phone_country ?? country) : null;
+  const whatsapp = input.whatsapp ? toValidE164(input.whatsapp, input.whatsapp_country ?? country) : null;
   const email = input.email?.toLowerCase() ?? null;
-  if (input.phone && !phone) fieldErrors.phone = "Numéro de téléphone invalide.";
-  if (input.whatsapp && !whatsapp) fieldErrors.whatsapp = "Numéro WhatsApp invalide.";
+  if (input.phone && !phone) fieldErrors.phone = "Numéro de téléphone invalide : vérifiez l’indicatif et le numéro.";
+  if (input.whatsapp && !whatsapp) fieldErrors.whatsapp = "Numéro WhatsApp invalide : vérifiez l’indicatif et le numéro.";
   if (email && !z.string().email().safeParse(email).success) fieldErrors.email = "Adresse e-mail invalide.";
   if (input.preferred_contact === "telephone" && !input.phone) fieldErrors.phone = "Indiquez votre numéro de téléphone.";
   if (input.preferred_contact === "whatsapp" && !input.whatsapp) fieldErrors.whatsapp = "Indiquez votre numéro WhatsApp.";
   if (input.preferred_contact === "email" && !input.email) fieldErrors.email = "Indiquez votre adresse e-mail.";
 
-  if (input.kind === "devis") {
-    if (!input.model_id && !input.device_other) fieldErrors.device = "Choisissez votre modèle ou décrivez votre appareil.";
-    if (!input.message || input.message.length < 5) fieldErrors.message = "Décrivez la panne en quelques mots.";
-  }
+  if (input.kind === "devis" && !input.model_id && !input.device_other) fieldErrors.device = "Choisissez votre modèle ou décrivez votre appareil.";
   if (input.kind === "contact" && (!input.message || input.message.length < 5)) fieldErrors.message = "Écrivez votre message.";
 
   const photos = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
@@ -113,6 +122,10 @@ export async function submitRequest(_prev: SubmitRequestState, formData: FormDat
   }
 
   if (Object.keys(fieldErrors).length) return { status: "error", error: "Vérifiez les champs indiqués.", fieldErrors };
+
+  if (!(await verifyTurnstile(formData.get("cf-turnstile-response")))) {
+    return { status: "error", error: "La vérification anti-robot a échoué. Réessayez." };
+  }
 
   const supabase = createServiceClient();
   const hash = await ipHash();

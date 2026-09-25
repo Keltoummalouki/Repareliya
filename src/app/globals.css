@@ -109,15 +109,16 @@
 }
 
 @layer components {
+  /* viewport-fit=cover : en paysage, le contenu reste hors des encoches */
   .container-page {
     width: 100%;
     max-width: 1240px;
     margin-inline: auto;
-    padding-inline: 16px;
+    padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
   }
   @media (min-width: 768px) {
     .container-page {
-      padding-inline: 32px;
+      padding-inline: max(32px, env(safe-area-inset-left)) max(32px, env(safe-area-inset-right));
     }
   }
   .eyebrow {
@@ -198,6 +199,56 @@
     line-height: 1.7;
     margin-bottom: 0.75rem;
   }
+  /* Squelettes de chargement (loading.tsx) : aplat teinté à partir de l’encre, lisible
+     sur tous les fonds (bg, surface, subtle) et dans les deux thèmes, balayé par un reflet. */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    background: color-mix(in oklab, var(--color-ink) 8%, transparent);
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
+    animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  }
+  :root[data-theme="dark"] .skeleton::after {
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent);
+  }
+}
+
+@keyframes skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Rangée qui défile horizontalement (sur mobile, via max-sm:/max-md:) au lieu d’empiler les cartes.
+   Elle déborde jusqu’au bord de l’écran : --bleed = marge intérieure du parent (16px : .container-page),
+   --item-w = largeur de chaque élément (auto par défaut, ex. 84% pour des cartes). */
+@utility scroller-x {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--bleed, 16px);
+  margin-inline: calc(var(--bleed, 16px) * -1);
+  padding-inline: var(--bleed, 16px);
+  /* laisse la place aux anneaux de focus, que overflow rognerait */
+  padding-block: 4px;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  & > * {
+    flex: none;
+    width: var(--item-w, auto);
+    scroll-snap-align: start;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -207,5 +258,30 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  /* Une animation infinie raccourcie à 0,01 ms clignoterait : le squelette reste fixe. */
+  .skeleton::after {
+    display: none;
+  }
+}
+
+/* Animations GSAP (components/site/motion.tsx) : les blocs [data-reveal] restent invisibles
+   jusqu’à leur entrée, seulement si JavaScript est actif et les animations autorisées.
+   Filet de sécurité : ils réapparaissent seuls si le script ne prend pas la main à temps. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    opacity: 0;
+    animation: reveal-fallback 0.4s 2.5s forwards;
+  }
+}
+@keyframes reveal-fallback {
+  to {
+    opacity: 1;
+  }
+}
+@media print {
+  [data-reveal],
+  [data-reveal] * {
+    opacity: 1 !important;
   }
 }

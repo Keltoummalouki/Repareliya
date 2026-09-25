@@ -10,6 +10,8 @@ type Option = { value: string; label: string; disabled: boolean; group?: string 
 type SelectProps = Omit<ComponentProps<"select">, "multiple" | "size"> & {
   searchable?: boolean;
   searchPlaceholder?: string;
+  /** Custom content for the closed trigger (the list keeps the option labels). */
+  renderValue?: (value: string) => ReactNode;
 };
 
 function textContent(node: ReactNode): string {
@@ -34,7 +36,7 @@ function readOptions(children: ReactNode, group?: string, groupDisabled = false)
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr");
 
 /** A styled single select that keeps a real form control for FormData and validation. */
-export function Select({ children, className, value, defaultValue, onChange, id, disabled, required, searchable, searchPlaceholder = "Rechercher…", onInvalid, ref: forwardedRef, ...props }: SelectProps) {
+export function Select({ children, className, value, defaultValue, onChange, id, disabled, required, searchable, searchPlaceholder = "Rechercher…", renderValue, onInvalid, ref: forwardedRef, ...props }: SelectProps) {
   const generatedId = useId();
   const triggerId = id ?? `select-${generatedId}`;
   const popupId = `${triggerId}-popup`;
@@ -215,7 +217,7 @@ export function Select({ children, className, value, defaultValue, onChange, id,
         onClick={(event) => { event.preventDefault(); if (open) close(); else show(); }}
         onKeyDown={handleKey}
       >
-        <span className={clsx("custom-select-value", selected?.disabled && "text-muted")}>{selected?.label ?? "Choisir une option…"}</span>
+        <span className={clsx("custom-select-value", selected?.disabled && "text-muted")}>{selected ? (renderValue ? renderValue(selected.value) : selected.label) : "Choisir une option…"}</span>
         <ChevronDown className="size-4 shrink-0 text-muted transition-transform" style={{ transform: open ? "rotate(180deg)" : undefined }} aria-hidden />
       </button>
       <div

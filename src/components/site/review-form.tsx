@@ -2,10 +2,11 @@
 
 import clsx from "clsx";
 import { CheckCircle2, Star } from "lucide-react";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { submitReview, type ReviewState } from "@/app/(site)/avis/actions";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/field";
+import { Turnstile, turnstileEnabled, type TurnstileHandle } from "@/components/ui/turnstile";
 
 const LABELS = ["", "Décevant", "Moyen", "Bien", "Très bien", "Excellent"];
 
@@ -14,6 +15,13 @@ export function ReviewForm() {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [startedAt] = useState(() => Date.now());
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const turnstile = useRef<TurnstileHandle>(null);
+
+  // Jeton Turnstile à usage unique : nouveau défi après chaque échec
+  useEffect(() => {
+    if (state.status === "error") turnstile.current?.reset();
+  }, [state]);
 
   if (state.status === "success") {
     return (
@@ -74,12 +82,13 @@ export function ReviewForm() {
         <input type="checkbox" name="consent" required className="mt-0.5 size-4.5 shrink-0 accent-brand-strong" />
         J’accepte la publication de mon prénom, de ma note et de mon avis sur ce site.
       </label>
+      <Turnstile ref={turnstile} onTokenChange={setCaptcha} />
       {state.status === "error" ? (
         <p className="text-sm font-medium text-danger" role="alert">
           {state.error}
         </p>
       ) : null}
-      <Button type="submit" loading={pending} disabled={!rating}>
+      <Button type="submit" loading={pending} disabled={!rating || (turnstileEnabled && !captcha)}>
         Publier mon avis
       </Button>
     </form>

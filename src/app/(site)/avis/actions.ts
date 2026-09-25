@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { ipHash, submittedTooFast } from "@/lib/request-guard";
+import { ipHash, submittedTooFast, verifyTurnstile } from "@/lib/request-guard";
 import { createServiceClient } from "@/lib/supabase/server";
 
 export type ReviewState = { status: "idle" } | { status: "success" } | { status: "error"; error: string };
@@ -26,6 +26,10 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
     device_label: formData.get("device_label") || undefined,
   });
   if (!parsed.success) return { status: "error", error: parsed.error.issues[0]?.message ?? "Vérifiez le formulaire." };
+
+  if (!(await verifyTurnstile(formData.get("cf-turnstile-response")))) {
+    return { status: "error", error: "La vérification anti-robot a échoué. Réessayez." };
+  }
 
   const supabase = createServiceClient();
   const hash = await ipHash();

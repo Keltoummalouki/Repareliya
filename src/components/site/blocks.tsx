@@ -20,13 +20,14 @@ export function SectionHeading({
   className?: string;
 }) {
   return (
-    <div className={clsx("mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between", className)}>
+    <div data-reveal="heading" className={clsx("mb-8 flex flex-col gap-5 sm:mb-10 md:flex-row md:items-end md:justify-between", className)}>
       <div className="max-w-2xl">
         <p className="eyebrow">{eyebrow}</p>
-        <h2 className="mt-4 text-[34px] font-extrabold leading-[1.08] sm:text-[44px]">{title}</h2>
-        {text ? <p className="mt-4 max-w-xl leading-relaxed text-ink-soft">{text}</p> : null}
+        <h2 className="mt-4 text-[30px] font-extrabold leading-[1.08] sm:text-[44px]">{title}</h2>
+        {text ? <p className="mt-3 max-w-xl leading-relaxed text-ink-soft sm:mt-4">{text}</p> : null}
       </div>
-      {action}
+      {/* Conteneur : sur mobile, le bouton garde sa largeur au lieu de s’étirer sur toute la ligne */}
+      {action ? <div className="md:shrink-0">{action}</div> : null}
     </div>
   );
 }
@@ -60,7 +61,7 @@ export type ReviewCardData = {
 
 export function ReviewCard({ review }: { review: ReviewCardData }) {
   return (
-    <figure className="card flex h-full flex-col p-6">
+    <figure className="card flex h-full flex-col p-5 sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <Stars rating={review.rating} />
         {review.source === "google" ? (

@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { Check, LoaderCircle, Search } from "lucide-react";
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { BrandMark, CategoryIcon } from "@/components/icons";
 import type { PickerBrand, PickerCategory, PickerModel } from "./catalog-client";
 
@@ -17,8 +17,23 @@ export function CategoryTabs({
   onChange: (id: string) => void;
   compact?: boolean;
 }) {
+  const listRef = useRef<HTMLDivElement>(null);
+
+  // Rangée défilante (mobile) : une catégorie présélectionnée hors écran est ramenée en vue.
+  useEffect(() => {
+    const list = listRef.current;
+    const active = list?.querySelector<HTMLElement>('[aria-checked="true"]');
+    if (!list || !active || list.scrollWidth <= list.clientWidth) return;
+    list.scrollLeft += active.getBoundingClientRect().left - list.getBoundingClientRect().left - 20;
+  }, []);
+
   return (
-    <div role="radiogroup" aria-label="Type d’appareil" className={clsx(compact ? "flex flex-wrap gap-2" : "grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5")}>
+    <div
+      ref={listRef}
+      role="radiogroup"
+      aria-label="Type d’appareil"
+      className={clsx(compact ? "flex flex-wrap gap-2 max-sm:scroller-x max-sm:[--bleed:20px]" : "grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5")}
+    >
       {categories.map((category) => {
         const active = category.id === value;
         return (
@@ -57,7 +72,7 @@ export function BrandChooser({
   if (loading) return <LoadingLine label="Chargement des marques…" />;
   if (!brands?.length) return <p className="text-sm text-muted">Aucune marque pour cette catégorie pour le moment.</p>;
   return (
-    <div role="radiogroup" aria-label="Marque" className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+    <div role="radiogroup" aria-label="Marque" className="grid grid-cols-3 gap-2 md:grid-cols-4">
       {brands.map((brand) => {
         const active = brand.brand_id === value;
         return (
@@ -68,12 +83,12 @@ export function BrandChooser({
             aria-checked={active}
             onClick={() => onChange(brand)}
             className={clsx(
-              "relative flex min-h-14 items-center justify-center rounded-xl border bg-surface px-3 py-2 transition-colors",
+              "relative flex min-h-12 items-center justify-center rounded-xl border bg-surface px-2 py-2 transition-colors sm:min-h-14 sm:px-3",
               active ? "border-brand-strong ring-2 ring-brand/25" : "border-line-strong hover:border-ink",
             )}
           >
-            <BrandMark slug={brand.slug} name={brand.name} logoUrl={brand.logo_url} iconClassName="size-5" className="text-[15px]" />
-            {active ? <Check className="absolute right-2 top-2 size-3.5 text-brand-strong" aria-hidden /> : null}
+            <BrandMark slug={brand.slug} name={brand.name} logoUrl={brand.logo_url} iconClassName="size-4 sm:size-5" className="text-[13px] sm:text-[15px]" />
+            {active ? <Check className="absolute right-1.5 top-1.5 size-3 text-brand-strong sm:right-2 sm:top-2 sm:size-3.5" aria-hidden /> : null}
           </button>
         );
       })}
@@ -152,6 +167,26 @@ export function ModelSearch({
         {!filtered.length ? <li className="px-3 py-4 text-sm text-muted">Aucun modèle ne correspond à « {query} ».</li> : null}
       </ul>
     </div>
+  );
+}
+
+/** Étape terminée, repliée en une ligne (sur mobile) : un toucher pour revenir au choix. */
+export function PickedChoice({ children, onEdit, className }: { children: ReactNode; onEdit: () => void; className?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onEdit}
+      className={clsx(
+        "flex min-h-13 w-full items-center justify-between gap-3 rounded-xl border border-brand-strong/50 bg-brand-soft/50 px-4 py-2 text-left transition-colors hover:border-brand-strong",
+        className,
+      )}
+    >
+      <span className="flex min-w-0 items-center gap-2.5 font-semibold">
+        <Check className="size-4 shrink-0 text-brand-strong" aria-hidden />
+        <span className="truncate">{children}</span>
+      </span>
+      <span className="shrink-0 text-[13px] font-semibold text-brand-strong underline underline-offset-4">Modifier</span>
+    </button>
   );
 }
 

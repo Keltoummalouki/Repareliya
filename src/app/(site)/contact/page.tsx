@@ -30,7 +30,7 @@ export default async function ContactPage() {
   return (
     <div className="container-page py-10 sm:py-14">
       <SectionHeading eyebrow="Contact" title={<>Parlons de<br />votre appareil.</>} />
-      <div className="grid gap-10 lg:grid-cols-[1fr_1.3fr]">
+      <div data-reveal="stagger" className="grid gap-10 lg:grid-cols-[1fr_1.3fr]">
         <div className="space-y-4">
           {cards.map((card) => (
             <a

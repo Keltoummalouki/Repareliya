@@ -10,9 +10,10 @@ type Social = { id: string; platform: string; url: string; label: string | null 
 export function Footer({ settings, socials }: { settings: SiteSettings; socials: Social[] }) {
   const year = new Date().getFullYear();
   const hours = settings.hours.filter((h) => h.value);
+  const hasContact = Boolean(settings.address || settings.phone || settings.email);
   return (
     <footer className="mt-auto border-t border-line bg-surface">
-      <div className="container-page grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1.1fr]">
+      <div className="container-page grid gap-9 py-10 sm:gap-10 sm:py-14 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1.1fr]">
         <div>
           <Logo name={settings.business_name} />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">{settings.tagline}</p>
@@ -36,7 +37,7 @@ export function Footer({ settings, socials }: { settings: SiteSettings; socials:
         </div>
         <nav aria-label="Liens du pied de page">
           <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted">Le site</h2>
-          <ul className="mt-4 grid gap-2.5 text-sm">
+          <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-1 sm:gap-y-2.5">
             <li><Link className="hover:text-brand-strong" href="/tarifs">Tarifs des réparations</Link></li>
             <li><Link className="hover:text-brand-strong" href="/devis">Demander un devis</Link></li>
             <li><Link className="hover:text-brand-strong" href="/accessoires">Accessoires</Link></li>
@@ -45,36 +46,38 @@ export function Footer({ settings, socials }: { settings: SiteSettings; socials:
             <li><Link className="hover:text-brand-strong" href="/contact">Contact</Link></li>
           </ul>
         </nav>
-        <div>
-          <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted">Nous trouver</h2>
-          <ul className="mt-4 grid gap-3 text-sm">
-            {settings.address ? (
-              <li className="flex gap-2.5">
-                <MapPin className="mt-0.5 size-4 shrink-0 text-brand-strong" aria-hidden />
-                <span>
-                  {settings.address}
-                  {settings.city ? `, ${settings.city}` : ""}
-                </span>
-              </li>
-            ) : null}
-            {settings.phone ? (
-              <li className="flex gap-2.5">
-                <Phone className="mt-0.5 size-4 shrink-0 text-brand-strong" aria-hidden />
-                <a href={telLink(settings.phone, settings.default_country) ?? undefined} className="hover:text-brand-strong">
-                  {formatPhone(settings.phone, settings.default_country)}
-                </a>
-              </li>
-            ) : null}
-            {settings.email ? (
-              <li className="flex gap-2.5">
-                <Mail className="mt-0.5 size-4 shrink-0 text-brand-strong" aria-hidden />
-                <a href={`mailto:${settings.email}`} className="break-all hover:text-brand-strong">
-                  {settings.email}
-                </a>
-              </li>
-            ) : null}
-          </ul>
-        </div>
+        {hasContact ? (
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted">Nous trouver</h2>
+            <ul className="mt-4 grid gap-3 text-sm">
+              {settings.address ? (
+                <li className="flex gap-2.5">
+                  <MapPin className="mt-0.5 size-4 shrink-0 text-brand-strong" aria-hidden />
+                  <span>
+                    {settings.address}
+                    {settings.city ? `, ${settings.city}` : ""}
+                  </span>
+                </li>
+              ) : null}
+              {settings.phone ? (
+                <li className="flex gap-2.5">
+                  <Phone className="mt-0.5 size-4 shrink-0 text-brand-strong" aria-hidden />
+                  <a href={telLink(settings.phone, settings.default_country) ?? undefined} className="hover:text-brand-strong">
+                    {formatPhone(settings.phone, settings.default_country)}
+                  </a>
+                </li>
+              ) : null}
+              {settings.email ? (
+                <li className="flex gap-2.5">
+                  <Mail className="mt-0.5 size-4 shrink-0 text-brand-strong" aria-hidden />
+                  <a href={`mailto:${settings.email}`} className="break-all hover:text-brand-strong">
+                    {settings.email}
+                  </a>
+                </li>
+              ) : null}
+            </ul>
+          </div>
+        ) : null}
         <div>
           <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted">Horaires</h2>
           {hours.length ? (

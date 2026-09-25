@@ -61,6 +61,13 @@ export function toE164(phone: string | null | undefined, defaultCountry = "MA"):
   return parsed.number;
 }
 
+/** Comme `toE164`, mais exige un numéro réellement attribuable dans son pays (longueur et préfixe). */
+export function toValidE164(phone: string | null | undefined, defaultCountry = "MA"): string | null {
+  if (!phone) return null;
+  const parsed = parsePhoneNumberFromString(phone.trim(), defaultCountry as CountryCode);
+  return parsed?.isValid() ? parsed.number : null;
+}
+
 export function isValidPhone(phone: string, defaultCountry = "MA") {
   const parsed = parsePhoneNumberFromString(phone.trim(), defaultCountry as CountryCode);
   return Boolean(parsed?.isPossible());

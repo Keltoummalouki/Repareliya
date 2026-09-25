@@ -27,16 +27,18 @@ export default async function TarifsPage({ searchParams }: PageProps<"/tarifs">)
         title={<>Le prix de votre<br />réparation.</>}
         text="Sélectionnez votre appareil pour afficher nos tarifs. Pièce et main-d’œuvre comprises ; le prix est confirmé après diagnostic."
       />
-      <PriceEstimator categories={categories} repairTypes={repairTypes} currency={settings.currency} initialCategoryId={initial} key={initial ?? "all"} />
+      <div data-reveal="up">
+        <PriceEstimator categories={categories} repairTypes={repairTypes} currency={settings.currency} initialCategoryId={initial} key={initial ?? "all"} />
+      </div>
 
-      <section className="mt-16">
-        <h2 className="text-2xl font-bold">Toutes les marques</h2>
-        <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <section className="mt-12 sm:mt-16">
+        <h2 data-reveal="up" className="text-2xl font-bold">Toutes les marques</h2>
+        <ul data-reveal="stagger" className="mt-5 grid grid-cols-2 gap-2 sm:mt-6 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
           {brands.map((brand) => (
             <li key={brand.id}>
               <Link
                 href={`/reparation/${brand.slug}`}
-                className="card flex h-full flex-col items-start justify-between gap-3 p-4 transition-colors hover:border-ink"
+                className="card flex h-full flex-col items-start justify-between gap-2 p-3.5 transition-colors hover:border-ink sm:gap-3 sm:p-4"
               >
                 <BrandMark slug={brand.slug} name={brand.name} logoUrl={brand.logo_url} iconClassName="size-5" className="text-[16px]" />
                 <span className="text-xs text-muted">{brand.count} modèle{brand.count > 1 ? "s" : ""}</span>

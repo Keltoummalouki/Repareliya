@@ -69,6 +69,7 @@ Useful scripts:
 ### Optional integrations
 - **E-mail (Resend)**: set `RESEND_API_KEY` and `EMAIL_FROM` (verified domain). Devis and factures are then sent by e-mail with the PDF attached, and you get an e-mail for every new request or online acceptance.
 - **Google reviews**: set `GOOGLE_PLACES_API_KEY` (Places API "New") and your Place ID in Paramètres. The home and Avis pages then show your Google rating and latest Google reviews.
+- **Anti-spam (Cloudflare Turnstile)**: create a widget in the Cloudflare dashboard → Turnstile (add your domain as a hostname), then set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY`. The devis, contact and accessoire forms and the review form then require the bot check, verified on the server. The site key is embedded at build time, so redeploy after changing it.
 - **WhatsApp / SMS** need no API. The dashboard opens WhatsApp (`wa.me`) or the SMS app with the message ready, and you press Send. Fully automatic sending would require the paid WhatsApp Business Platform or an SMS provider (e.g. Twilio).
 
 ## CI/CD

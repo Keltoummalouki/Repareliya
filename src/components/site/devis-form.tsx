@@ -5,9 +5,11 @@ import { ArrowRight, Camera, CheckCircle2, ImagePlus, Mail, PencilLine, Phone, X
 import Link from "next/link";
 import { startTransition, useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { submitRequest, type SubmitRequestState } from "@/app/(site)/devis/actions";
-import { RepairIcon, WhatsappIcon } from "@/components/icons";
+import { BrandMark, RepairIcon, WhatsappIcon } from "@/components/icons";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/field";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { Turnstile, turnstileEnabled, type TurnstileHandle } from "@/components/ui/turnstile";
 import { formatMoney, formatPhone } from "@/lib/format";
 import { compressImage } from "@/lib/image-compress";
 import type { ContactMethod } from "@/lib/contact";
@@ -21,7 +23,7 @@ import {
   type PickerModel,
   type PickerRepairType,
 } from "./catalog-client";
-import { BrandChooser, CategoryTabs, ModelSearch } from "./device-picker";
+import { BrandChooser, CategoryTabs, ModelSearch, PickedChoice } from "./device-picker";
 
 type InitialModel = { id: string; name: string; brand_id: string; brand_name: string; brand_slug: string; category_id: string } | null;
 
@@ -53,6 +55,8 @@ export function DevisForm({
   const [state, dispatch, pending] = useActionState<SubmitRequestState, FormData>(submitRequest, { status: "idle" });
   const formRef = useRef<HTMLFormElement>(null);
   const [startedAt] = useState(() => Date.now());
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const turnstile = useRef<TurnstileHandle>(null);
 
   // Appareil
   const [categoryId, setCategoryId] = useState<string | null>(initialModel?.category_id ?? null);
@@ -92,6 +96,8 @@ export function DevisForm({
   useEffect(() => {
     if (state.status === "success") window.scrollTo({ top: 0, behavior: "smooth" });
     if (state.status === "error") {
+      // Jeton Turnstile à usage unique : nouveau défi après chaque échec
+      turnstile.current?.reset();
       const firstError = formRef.current?.querySelector<HTMLElement>("[aria-invalid='true']");
       firstError?.focus();
     }
@@ -101,6 +107,13 @@ export function DevisForm({
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    // Numéro invalide pour l'indicatif choisi : on l'affiche sans envoyer la demande
+    const invalidPhone = Array.from(event.currentTarget.querySelectorAll<HTMLInputElement>("input[type='tel']")).find((input) => input.validity.customError);
+    if (invalidPhone) {
+      invalidPhone.checkValidity();
+      invalidPhone.focus();
+      return;
+    }
     const formData = new FormData(event.currentTarget);
     formData.delete("photos");
     for (const photo of photos) formData.append("photos", await compressImage(photo.file));
@@ -195,15 +208,31 @@ export function DevisForm({
                 }}
               />
               {categoryId && !otherDevice ? (
-                <BrandChooser
-                  brands={brands.data}
-                  loading={brands.loading}
-                  value={brand?.brand_id ?? null}
-                  onChange={(b) => {
-                    setBrand(b);
-                    setModel(null);
-                  }}
-                />
+                <>
+                  {/* Mobile : la marque choisie se replie en une ligne pour laisser place aux modèles */}
+                  {brand ? (
+                    <PickedChoice
+                      className="lg:hidden"
+                      onEdit={() => {
+                        setBrand(null);
+                        setModel(null);
+                      }}
+                    >
+                      <BrandMark slug={brand.slug} name={brand.name} iconClassName="size-4.5" className="text-[15px]" />
+                    </PickedChoice>
+                  ) : null}
+                  <div className={clsx(brand && "max-lg:hidden")}>
+                    <BrandChooser
+                      brands={brands.data}
+                      loading={brands.loading}
+                      value={brand?.brand_id ?? null}
+                      onChange={(b) => {
+                        setBrand(b);
+                        setModel(null);
+                      }}
+                    />
+                  </div>
+                </>
               ) : null}
               {brand && !otherDevice ? (
                 <ModelSearch
@@ -244,7 +273,8 @@ export function DevisForm({
 
       {kind === "devis" ? (
         <Section title="2. La réparation" subtitle="Plusieurs choix possibles. Vous ne savez pas ? Choisissez « Diagnostic ».">
-          <div className="grid gap-2 sm:grid-cols-2">
+          {/* Mobile : tuiles sur deux colonnes (la case est masquée, la tuile entière se coche) */}
+          <div className="grid grid-cols-2 gap-2">
             {availableRepairs.map((type) => {
               const checked = repairs.includes(type.id);
               const price = priceFor(type.id);
@@ -252,19 +282,20 @@ export function DevisForm({
                 <label
                   key={type.id}
                   className={clsx(
-                    "flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-3 transition-colors",
+                    "relative flex cursor-pointer flex-col items-start gap-1.5 rounded-xl border px-3 py-2.5 transition-colors has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-brand/40 sm:flex-row sm:items-center sm:gap-3 sm:px-3.5 sm:py-3",
                     checked ? "border-brand-strong bg-brand-soft/60" : "border-line-strong bg-surface hover:border-ink",
                   )}
                 >
                   <input
                     type="checkbox"
-                    className="size-4.5 accent-brand-strong"
+                    className="size-4.5 accent-brand-strong max-sm:sr-only"
                     checked={checked}
                     onChange={() => setRepairs((current) => (checked ? current.filter((id) => id !== type.id) : [...current, type.id]))}
                   />
                   <RepairIcon icon={type.icon} className="size-5 text-brand-strong" />
-                  <span className="flex-1 text-[15px] font-medium">{type.name}</span>
+                  <span className="flex-1 text-[13px] font-medium leading-snug sm:text-[15px]">{type.name}</span>
                   {price !== null ? <span className="text-sm font-bold">{formatMoney(price, currency)}</span> : null}
+                  {checked ? <CheckCircle2 className="absolute right-2 top-2 size-4.5 text-brand-strong sm:hidden" aria-hidden /> : null}
                 </label>
               );
             })}
@@ -275,7 +306,7 @@ export function DevisForm({
               <span className="text-muted"> — confirmée après diagnostic.</span>
             </p>
           ) : null}
-          <Field label="Décrivez la panne" htmlFor="message" required className="mt-5" error={errors.message}>
+          <Field label="Décrivez la panne (facultatif)" htmlFor="message" className="mt-5" error={errors.message}>
             <Textarea
               id="message"
               name="message"
@@ -335,12 +366,13 @@ export function DevisForm({
           <legend className="field-label">
             Comment préférez-vous recevoir votre {kind === "devis" ? "devis" : "réponse"} ?<span className="text-brand-strong"> *</span>
           </legend>
-          <div className="grid gap-2 sm:grid-cols-3" role="radiogroup">
+          {/* Mobile : trois tuiles côte à côte, l’icône au-dessus du libellé */}
+          <div className="grid grid-cols-3 gap-2" role="radiogroup">
             {METHODS.map((m) => (
               <label
                 key={m.value}
                 className={clsx(
-                  "flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-3 transition-colors",
+                  "flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-center transition-colors has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-brand/40 sm:flex-row sm:gap-3 sm:px-3.5 sm:text-left",
                   method === m.value ? "border-ink bg-ink text-on-fill" : "border-line-strong bg-surface hover:border-ink",
                 )}
               >
@@ -354,8 +386,8 @@ export function DevisForm({
                 />
                 <span className={clsx(method === m.value ? "text-brand" : m.value === "whatsapp" ? "text-whatsapp" : "text-ink")}>{m.icon}</span>
                 <span>
-                  <span className="block text-[15px] font-semibold">{m.label}</span>
-                  <span className={clsx("block text-xs", method === m.value ? "text-on-fill/70" : "text-muted")}>{m.hint}</span>
+                  <span className="block text-sm font-semibold sm:text-[15px]">{m.label}</span>
+                  <span className={clsx("hidden text-xs sm:block", method === m.value ? "text-on-fill/70" : "text-muted")}>{m.hint}</span>
                 </span>
               </label>
             ))}
@@ -365,9 +397,8 @@ export function DevisForm({
 
         {method ? (
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            {(["whatsapp", "telephone", "email"] satisfies ContactMethod[])
-              .sort((a, b) => Number(b === method) - Number(a === method))
-              .map((field) => {
+            {/* Un seul numéro affiché : celui du canal choisi (ou téléphone si e-mail) */}
+            {(method === "email" ? (["email", "telephone"] as const) : ([method, "email"] as const)).map((field) => {
                 const required = field === method;
                 const name = field === "telephone" ? "phone" : field;
                 const label = field === "whatsapp" ? "Numéro WhatsApp" : field === "telephone" ? "Numéro de téléphone" : "Adresse e-mail";
@@ -377,20 +408,23 @@ export function DevisForm({
                     label={required ? label : `${label} (facultatif)`}
                     htmlFor={name}
                     required={required}
-                    error={errors[name]}
-                    className={required ? "sm:col-span-2" : undefined}
+                    error={field === "email" ? errors[name] : undefined}
                   >
-                    <Input
-                      id={name}
-                      name={name}
-                      type={field === "email" ? "email" : "tel"}
-                      inputMode={field === "email" ? "email" : "tel"}
-                      autoComplete={field === "email" ? "email" : "tel"}
-                      placeholder={field === "email" ? "vous@exemple.com" : "06 12 34 56 78"}
-                      maxLength={field === "email" ? 160 : 40}
-                      aria-invalid={Boolean(errors[name])}
-                      required={required}
-                    />
+                    {field === "email" ? (
+                      <Input
+                        id={name}
+                        name={name}
+                        type="email"
+                        inputMode="email"
+                        autoComplete="email"
+                        placeholder="vous@exemple.com"
+                        maxLength={160}
+                        aria-invalid={Boolean(errors[name])}
+                        required={required}
+                      />
+                    ) : (
+                      <PhoneInput id={name} name={name} defaultCountry={country} required={required} error={errors[name]} />
+                    )}
                   </Field>
                 );
               })}
@@ -405,6 +439,8 @@ export function DevisForm({
             <span className="text-brand-strong"> *</span>
           </span>
         </label>
+
+        <Turnstile ref={turnstile} onTokenChange={setCaptcha} className="mt-6" />
       </Section>
 
       <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-8">
@@ -415,7 +451,13 @@ export function DevisForm({
         ) : (
           <p className="text-xs text-muted">Sans engagement : vous validez le devis avant toute intervention.</p>
         )}
-        <Button type="submit" size="lg" loading={pending} icon={pending ? undefined : <ArrowRight className="size-4" />}>
+        <Button
+          type="submit"
+          size="lg"
+          loading={pending}
+          disabled={turnstileEnabled && !captcha}
+          icon={pending ? undefined : <ArrowRight className="size-4" />}
+        >
           {pending ? "Envoi en cours…" : kind === "devis" ? "Envoyer ma demande de devis" : "Envoyer"}
         </Button>
       </div>

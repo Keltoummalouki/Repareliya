@@ -25,7 +25,7 @@ export default async function AvisPage() {
     <div className="container-page py-10 sm:py-14">
       <SectionHeading eyebrow="Avis clients" title={<>Ils nous ont confié<br />leur appareil.</>} />
 
-      <div className="mb-10 grid gap-4 sm:grid-cols-2">
+      <div data-reveal="stagger" className="mb-10 grid gap-4 sm:grid-cols-2">
         {data.average ? (
           <div className="card flex items-center gap-5 p-6">
             <p className="font-display text-5xl font-extrabold">{data.average.toFixed(1).replace(".", ",")}</p>
@@ -49,7 +49,7 @@ export default async function AvisPage() {
       </div>
 
       {data.reviews.length || google?.reviews.length ? (
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div data-reveal="stagger" className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {data.reviews.map((review) => (
             <ReviewCard key={review.id} review={review} />
           ))}
@@ -61,7 +61,7 @@ export default async function AvisPage() {
         <p className="card p-8 text-center text-muted">Aucun avis publié pour le moment. Soyez le premier !</p>
       )}
 
-      <section id="laisser-un-avis" className="mt-16 grid scroll-mt-28 gap-8 lg:grid-cols-[1fr_1.4fr]">
+      <section id="laisser-un-avis" data-reveal="stagger" className="mt-16 grid scroll-mt-28 gap-8 lg:grid-cols-[1fr_1.4fr]">
         <div>
           <h2 className="text-3xl font-extrabold">Votre avis compte</h2>
           <p className="mt-3 max-w-md leading-relaxed text-ink-soft">

@@ -24,7 +24,7 @@ export default async function AccessoiresPage({ searchParams }: PageProps<"/acce
         text="Réservez en ligne : nous confirmons la disponibilité et gardons l’article de côté pour vous."
       />
       {categories.length > 1 ? (
-        <nav aria-label="Catégories d’accessoires" className="mb-8 flex flex-wrap gap-2">
+        <nav data-reveal="up" aria-label="Catégories d’accessoires" className="mb-8 flex flex-wrap gap-2">
           <FilterLink href="/accessoires" active={!active}>Tout</FilterLink>
           {categories.map((c) => (
             <FilterLink key={c} href={`/accessoires?categorie=${encodeURIComponent(c)}`} active={active === c}>
@@ -34,7 +34,7 @@ export default async function AccessoiresPage({ searchParams }: PageProps<"/acce
         </nav>
       ) : null}
       {list.length ? (
-        <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+        <div data-reveal="stagger" className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
           {list.map((item) => (
             <AccessoryCard key={item.id} item={item} currency={settings.currency} />
           ))}
