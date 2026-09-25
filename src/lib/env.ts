@@ -22,8 +22,9 @@ export function supabaseSecretKey() {
 
 export function siteUrl() {
   const url =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : undefined) ??
+    // `||` et non `??` : une variable définie mais vide sur Vercel doit être ignorée.
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : undefined) ||
     "http://localhost:3800";
   return url.replace(/\/+$/, "");
 }
