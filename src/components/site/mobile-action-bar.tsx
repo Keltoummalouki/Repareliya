@@ -26,7 +26,7 @@ export function MobileActionBar({ whatsappHref, phoneHref }: { whatsappHref: str
 
   if (pathname.startsWith("/devis")) return null;
 
-  const iconButton = "grid size-12 shrink-0 place-items-center rounded-[10px] transition-colors";
+  const iconButton = "grid size-12 shrink-0 place-items-center rounded-full transition-colors";
 
   return (
     <>
@@ -51,12 +51,13 @@ export function MobileActionBar({ whatsappHref, phoneHref }: { whatsappHref: str
             </a>
           ) : null}
           {!phoneHref && !whatsappHref && !pathname.startsWith("/tarifs") ? (
-            <Link href="/tarifs" className="flex h-12 shrink-0 items-center gap-1.5 rounded-[10px] border border-line-strong bg-surface px-4 text-sm font-semibold text-ink">
+            <Link href="/tarifs" className="flex h-12 shrink-0 items-center gap-1.5 rounded-full border border-line-strong bg-surface px-4 text-sm font-medium text-ink">
               <Tag className="size-4" aria-hidden /> Tarifs
             </Link>
           ) : null}
-          <ButtonLink href="/devis" size="lg" className="h-12 flex-1" icon={<ArrowUpRight className="size-4" />}>
-            Demander un devis
+          {/* Taille adaptée à la barre : le bouton prend la place restante sans jamais déborder de l’écran */}
+          <ButtonLink href="/devis" className="h-12 min-w-0 flex-1 gap-1.5 px-4" icon={<ArrowUpRight className="size-4 shrink-0" />}>
+            <span className="truncate">Demander un devis</span>
           </ButtonLink>
         </div>
       </div>

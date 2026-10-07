@@ -26,7 +26,7 @@ export function FieldSkeleton({ className }: { className?: string }) {
   return (
     <div className={className}>
       <Skeleton className="h-3.5 w-24" />
-      <Skeleton className="mt-2.5 h-11 rounded-[10px]" />
+      <Skeleton className="mt-2.5 h-11 rounded-xl" />
     </div>
   );
 }

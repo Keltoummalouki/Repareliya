@@ -1,0 +1,1030 @@
+/* ======================================================================================
+   Expérience animée du site public, aux couleurs d’apple.com : noir, gris #1d1d1f,
+   texte #f5f5f7 / #86868b, bleu #0071e3 pour agir et #2997ff pour les accents sur fond sombre.
+   En-tête, curseur, rideaux, préchargement, scène 3D, bandeaux, cartes et effets de texte.
+   Chargé par le layout du site public seulement ; styles hors couche : ils priment sur les
+   utilitaires Tailwind qu’ils ajustent.
+   ====================================================================================== */
+
+/* -------------------------------------------------------------------------- En-tête */
+/* Barre translucide ; au défilement, elle se détache en pilule flottante (grands écrans). */
+.site-header {
+  background: color-mix(in oklab, var(--color-bg) 78%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--color-line) 80%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  transition:
+    transform 0.7s var(--ease-expo),
+    background-color 0.4s,
+    border-color 0.4s,
+    color 0.4s;
+}
+.site-header-bar {
+  transition:
+    max-width 0.6s var(--ease-expo),
+    margin 0.6s var(--ease-expo),
+    height 0.6s var(--ease-expo),
+    border-radius 0.6s var(--ease-expo),
+    background-color 0.4s,
+    box-shadow 0.4s;
+}
+@media (min-width: 1024px) {
+  .site-header[data-scrolled="true"] {
+    background: transparent;
+    border-color: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .site-header[data-scrolled="true"] .site-header-bar {
+    max-width: 1080px;
+    height: 56px;
+    margin-top: 8px;
+    border-radius: 18px;
+    background: color-mix(in oklab, var(--color-surface) 74%, transparent);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    box-shadow:
+      0 12px 40px -16px rgb(0 0 0 / 0.28),
+      inset 0 0 0 1px color-mix(in oklab, var(--color-line-strong) 70%, transparent);
+  }
+}
+/* Se retire au défilement vers le bas, sauf si le clavier y navigue */
+.site-header[data-hidden="true"]:not(:focus-within) {
+  transform: translateY(-110%);
+}
+.site-header .header-icon {
+  border-color: transparent;
+  color: var(--color-ink);
+}
+.site-header .header-icon:hover {
+  background: color-mix(in oklab, var(--color-ink) 8%, transparent);
+}
+.site-header .nav-link {
+  color: color-mix(in oklab, var(--color-ink) 82%, transparent);
+  transition: color 0.2s;
+}
+.site-header .nav-link:hover,
+.site-header .nav-link[aria-current="page"] {
+  color: var(--color-ink);
+}
+/* Au-dessus d’une section sombre : transparent, texte clair (le logo suit currentColor) */
+.site-header[data-tone="dark"] {
+  --color-ink: #f5f5f7;
+  background: transparent;
+  border-color: transparent;
+  color: #f5f5f7;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.site-header[data-tone="dark"][data-scrolled="true"] {
+  background: rgb(22 22 23 / 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+@media (min-width: 1024px) {
+  .site-header[data-tone="dark"][data-scrolled="true"] {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .site-header[data-tone="dark"][data-scrolled="true"] .site-header-bar {
+    background: rgb(29 29 31 / 0.72);
+    box-shadow:
+      0 12px 40px -16px rgb(0 0 0 / 0.6),
+      inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  }
+}
+.site-header[data-tone="dark"] .header-icon:hover {
+  background: rgb(255 255 255 / 0.12);
+}
+
+/* Lien qui « roule » au survol : la ligne file vers le haut, sa copie la remplace */
+.text-roll {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+}
+.text-roll > span,
+.text-roll::after {
+  display: block;
+  transition: transform 0.6s var(--ease-expo);
+}
+.text-roll::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  transform: translateY(105%);
+}
+a:hover .text-roll > span,
+a:focus-visible .text-roll > span {
+  transform: translateY(-105%);
+}
+a:hover .text-roll::after,
+a:focus-visible .text-roll::after {
+  transform: translateY(0);
+}
+
+/* -------------------------------------------------------------- Curseur (souris) */
+/* Gris neutre (#86868b), lisible sur le noir comme sur le gris clair. Pas de mode de fusion
+   « différence » : sur un bouton bleu, il inversait les couleurs en une pastille orange. */
+.cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.cursor[data-visible="true"] {
+  opacity: 1;
+}
+.cursor-pos {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+.cursor-ring {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  translate: -50% -50%;
+  border: 1.5px solid rgb(134 134 139 / 0.55);
+  border-radius: 999px;
+  transition:
+    width 0.5s var(--ease-expo),
+    height 0.5s var(--ease-expo),
+    background-color 0.3s,
+    border-color 0.3s,
+    opacity 0.3s,
+    scale 0.4s var(--ease-expo);
+}
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  translate: -50% -50%;
+  border-radius: 999px;
+  background: #86868b;
+  transition:
+    scale 0.3s var(--ease-expo),
+    opacity 0.2s;
+}
+.cursor-text {
+  font: 600 12px/1 var(--font-sans);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+/* Sur un lien ou un bouton, le curseur s’efface : le texte reste lisible, le bouton magnétique fait le reste */
+.cursor[data-state="hover"] .cursor-ring {
+  opacity: 0;
+  scale: 1.6;
+}
+.cursor[data-state="hover"] .cursor-dot,
+.cursor[data-state="label"] .cursor-dot {
+  scale: 0;
+}
+.cursor[data-state="label"] .cursor-ring {
+  width: 88px;
+  height: 88px;
+  background: var(--color-cta);
+  border-color: var(--color-cta);
+}
+.cursor[data-state="label"] .cursor-text {
+  opacity: 1;
+}
+.cursor[data-state="text"] .cursor-ring {
+  opacity: 0;
+  scale: 0.4;
+}
+.cursor[data-state="text"] .cursor-dot {
+  opacity: 0;
+}
+.cursor[data-pressed="true"] .cursor-ring {
+  scale: 0.82;
+}
+@media (hover: none), (pointer: coarse) {
+  .cursor {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------- Rideaux entre les pages */
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  visibility: hidden;
+  pointer-events: none;
+}
+.curtain[data-active="true"] {
+  visibility: visible;
+  pointer-events: auto;
+}
+.curtain-panel {
+  position: absolute;
+  inset: 0;
+  transform: translateY(100%);
+  will-change: transform;
+}
+.curtain-panel--brand {
+  background: var(--color-night-soft);
+}
+.curtain-panel--night {
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(55% 45% at 50% 55%, rgb(41 151 255 / 0.12), transparent 70%),
+    var(--color-night);
+  color: #f5f5f7;
+}
+.curtain-label {
+  display: flex;
+  overflow: hidden;
+  padding: 0 0.04em 0.12em;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 10vw, 9rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+.curtain-label > span {
+  display: inline-block;
+}
+.curtain-caption {
+  position: absolute;
+  left: 50%;
+  bottom: max(32px, env(safe-area-inset-bottom));
+  translate: -50% 0;
+  white-space: nowrap;
+  font: 500 13px/1 var(--font-sans);
+  color: #86868b;
+}
+
+/* --------------------------------------------- Préchargement (premier passage) */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9995;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #000;
+  color: #f5f5f7;
+}
+html[data-intro] .preloader {
+  display: flex;
+  /* Filet de sécurité : s’efface seul si le script ne prend pas la main */
+  animation: preloader-fallback 0.6s 6s forwards;
+}
+@keyframes preloader-fallback {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+.preloader-glow {
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(36% 30% at 50% 50%, rgb(41 151 255 / 0.14), transparent 70%);
+}
+.preloader-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+.preloader-mark {
+  width: 70px;
+  height: auto;
+  overflow: visible;
+  opacity: 0;
+}
+.preloader-path {
+  fill: #f5f5f7;
+  fill-opacity: 0;
+  stroke: #f5f5f7;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.preloader-word {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 5vw, 40px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  clip-path: inset(0% 100% 0% 0%);
+}
+.preloader-bar {
+  position: relative;
+  display: block;
+  width: 160px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.14);
+}
+.preloader-bar > span {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--color-cta), var(--color-sky));
+}
+.preloader-status {
+  position: absolute;
+  left: max(24px, env(safe-area-inset-left));
+  bottom: max(28px, env(safe-area-inset-bottom));
+  font: 500 13px/1 var(--font-sans);
+  color: #86868b;
+}
+.preloader-count {
+  position: absolute;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  font: 600 clamp(56px, 9vw, 120px)/0.85 var(--font-display);
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------- Progression de lecture */
+.scroll-progress {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 60;
+  width: 100%;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--color-cta), var(--color-sky));
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------- Effets de texte */
+/* Dégradé « titane » des grands titres sur fond noir, comme le chrome des pages produit */
+.text-gradient {
+  background: linear-gradient(180deg, #ffffff 0%, #d2d2d7 45%, #86868b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-outline {
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.2px currentColor;
+}
+
+/* ---------------------------------------------- Scène 3D de l’accueil (PhoneStage) */
+.stage {
+  position: relative;
+  /* Durée du récit : la hauteur au-delà d’un écran est la distance de défilement */
+  height: 430vh;
+  /* Glisse sous l’en-tête collant, transparent au-dessus de la scène */
+  margin-top: -64px;
+  background: #000;
+  color: #f5f5f7;
+}
+@media (min-width: 640px) {
+  .stage {
+    margin-top: -72px;
+  }
+}
+@media (max-width: 767px) {
+  .stage {
+    height: 380vh;
+  }
+}
+.stage-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+/* Noir profond, un halo bleuté à peine perceptible et un projecteur venu d’en haut */
+.stage-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(50% 40% at 50% -5%, rgb(255 255 255 / 0.07), transparent 70%),
+    radial-gradient(60% 50% at 70% 50%, rgb(41 151 255 / 0.08), transparent 66%),
+    #000;
+}
+/* Éclair au moment de l’impact */
+.stage-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(45% 45% at 68% 50%, rgb(255 255 255 / 0.45), transparent 70%);
+  opacity: 0;
+}
+.stage.is-impact .stage-bg::after {
+  animation: stage-flash 1s ease-out;
+}
+@keyframes stage-flash {
+  6% {
+    opacity: 1;
+  }
+}
+.stage-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* Mot géant en filigrane, qui glisse derrière le téléphone (centré par GSAP) */
+.stage-word {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: -1;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: clamp(5rem, 19vw, 21rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.14);
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+}
+.stage-chapter {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+.stage-chapter .container-page {
+  pointer-events: none;
+}
+.stage-chapter a,
+.stage-chapter button {
+  pointer-events: auto;
+}
+.stage-chapter--intro {
+  padding-top: 72px;
+}
+.stage-chapter--repair {
+  align-items: flex-end;
+  padding-bottom: 13vh;
+}
+.stage-chapter--repair,
+.stage-chapter--parts,
+.stage-chapter--finale {
+  visibility: hidden;
+  opacity: 0;
+}
+@media (max-width: 1023px) {
+  .stage-chapter--intro,
+  .stage-chapter--parts,
+  .stage-chapter--finale {
+    align-items: flex-start;
+    padding-top: 96px;
+  }
+  .stage-chapter--repair {
+    padding-bottom: 16vh;
+  }
+}
+.stage-intro {
+  max-width: 41rem;
+}
+/* Nom de « produit » au-dessus du titre, comme « iPhone 18 Pro » */
+.stage-eyebrow {
+  font-size: clamp(17px, 1.6vw, 24px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: #f5f5f7;
+}
+.stage-title {
+  margin-top: 14px;
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 6vw, 6.25rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+/* Deuxième phrase du titre en gris, comme les titres à deux tons d’apple.com */
+.stage-title-dim {
+  color: #86868b;
+}
+.stage-lead {
+  margin-top: 22px;
+  max-width: 33rem;
+  font-size: clamp(1.05rem, 1.35vw, 1.3rem);
+  line-height: 1.45;
+  letter-spacing: -0.016em;
+  color: #a1a1a6;
+}
+.stage-kicker {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.016em;
+  color: #86868b;
+}
+.stage-display {
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: clamp(4.2rem, 10vw, 9.5rem);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+.stage-heading {
+  margin-top: 12px;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+.stage-note {
+  margin-top: 20px;
+  max-width: 27rem;
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: -0.016em;
+  color: #a1a1a6;
+}
+/* Sous « Réparé. », laisser passer le jambage du p */
+.stage-display + .stage-note {
+  margin-top: 30px;
+}
+/* Étiquettes de la vue éclatée, posées par la scène sur leur pièce */
+.stage-labels {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.stage-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+/* Le point se pose sur la pièce ; l’étiquette part à droite ou à gauche selon le côté du téléphone.
+   (Alignement sur un élément que GSAP n’anime pas : il remplacerait la propriété translate.) */
+.stage-label-align {
+  translate: -4px -50%;
+}
+.stage-label[data-side="left"] .stage-label-align {
+  translate: calc(-100% + 4px) -50%;
+}
+.stage-label-inner {
+  display: flex;
+  align-items: center;
+  transform-origin: 0 50%;
+  visibility: hidden;
+  opacity: 0;
+}
+.stage-label[data-side="left"] .stage-label-inner {
+  flex-direction: row-reverse;
+  transform-origin: 100% 50%;
+}
+.stage-label-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--color-sky);
+  box-shadow:
+    0 0 0 4px rgb(41 151 255 / 0.22),
+    0 0 18px rgb(41 151 255 / 0.9);
+}
+.stage-label-line {
+  flex: none;
+  width: clamp(22px, 4vw, 60px);
+  height: 1px;
+  background: linear-gradient(90deg, rgb(255 255 255 / 0.75), rgb(255 255 255 / 0.25));
+  transform-origin: 0 50%;
+}
+.stage-label[data-side="left"] .stage-label-line {
+  background: linear-gradient(270deg, rgb(255 255 255 / 0.75), rgb(255 255 255 / 0.25));
+  transform-origin: 100% 50%;
+}
+.stage-label-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  white-space: nowrap;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 999px;
+  background: rgb(29 29 31 / 0.86);
+  font: 600 12px/1 var(--font-sans);
+  letter-spacing: -0.01em;
+  color: #f5f5f7;
+}
+.stage-label-index {
+  font: 500 11px/1 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  color: #86868b;
+}
+/* Jauge de réparation */
+.stage-meter {
+  position: absolute;
+  inset-inline: 0;
+  bottom: max(26px, env(safe-area-inset-bottom));
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.stage-meter-track {
+  position: relative;
+  width: 180px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.16);
+}
+.stage-meter-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--color-cta), var(--color-sky));
+}
+.stage-meter-text {
+  font: 500 13px/1 var(--font-sans);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  color: #86868b;
+}
+.stage[data-repaired="true"] .stage-meter-text {
+  color: var(--color-sky);
+}
+/* Version fixe : sans WebGL, sans JavaScript ou avec moins d’animations */
+.stage-fallback {
+  display: none;
+}
+.stage[data-mode="static"] {
+  height: auto;
+}
+.stage[data-mode="static"] .stage-sticky {
+  position: relative;
+  display: grid;
+  gap: 40px;
+  height: auto;
+  min-height: 100svh;
+  align-content: center;
+  padding: 120px 0 72px;
+}
+.stage[data-mode="static"] .stage-chapter--intro {
+  position: relative;
+  padding-top: 0;
+}
+.stage[data-mode="static"] .stage-fallback {
+  display: block;
+  width: min(100% - 32px, 620px);
+  margin-inline: auto;
+}
+@media (min-width: 1024px) {
+  .stage[data-mode="static"] .stage-fallback {
+    position: absolute;
+    right: max(32px, (100vw - 1240px) / 2 + 32px);
+    top: 50%;
+    width: min(44vw, 560px);
+    translate: 0 -40%;
+  }
+}
+.stage[data-mode="static"] :is(.stage-canvas, .stage-word, .stage-labels, .stage-meter, .stage-chapter--repair, .stage-chapter--parts, .stage-chapter--finale) {
+  display: none;
+}
+@media (scripting: none) {
+  .stage {
+    height: auto;
+  }
+  .stage-sticky {
+    position: relative;
+    height: auto;
+    padding: 120px 0 72px;
+  }
+  .stage-chapter--intro {
+    position: relative;
+    padding-top: 0;
+  }
+  .stage-fallback {
+    display: block;
+    width: min(100% - 32px, 620px);
+    margin: 40px auto 0;
+  }
+  :is(.stage-canvas, .stage-word, .stage-labels, .stage-meter, .stage-chapter--repair, .stage-chapter--parts, .stage-chapter--finale) {
+    display: none;
+  }
+}
+
+/* ------------------------------------ Fond 3D des pages intérieures (ShardBackdrop) */
+.shard-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(38% 36% at 80% 14%, rgb(0 113 227 / 0.08), transparent 70%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent 92%);
+  mask-image: linear-gradient(to bottom, #000 35%, transparent 92%);
+  transition: opacity 0.9s var(--ease-expo);
+}
+.shard-backdrop[data-hidden="true"] {
+  opacity: 0;
+}
+
+/* ------------------------------------------------------------ Bandeaux qui défilent */
+.marquee {
+  overflow: hidden;
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+.marquee-copy {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+.brand-marquee {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.brand-marquee .marquee-copy {
+  gap: 12px;
+  padding: 4px 12px 4px 0;
+}
+
+/* ------------------------------------------- « Ce que nous réparons » : grille bento */
+.bento {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bento-tile--featured {
+    grid-row: span 2;
+  }
+}
+@media (min-width: 1024px) {
+  .bento {
+    grid-template-columns: 1.15fr 1fr 1fr;
+    grid-auto-rows: minmax(310px, auto);
+  }
+}
+.bento-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  overflow: hidden;
+  padding: 26px 28px 24px;
+  border-radius: 28px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--color-ink);
+  transition: box-shadow 0.5s var(--ease-expo);
+}
+.bento-tile:hover {
+  box-shadow: 0 30px 70px -34px rgb(0 0 0 / 0.3);
+}
+.bento-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.bento-title {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.022em;
+}
+.bento-tile--featured .bento-title {
+  font-size: clamp(24px, 2.4vw, 32px);
+}
+.bento-text {
+  margin-top: 6px;
+  max-width: 28ch;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--color-muted);
+}
+.bento-index {
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-faint);
+}
+/* Pastille d’état : symptôme (point rouge qui clignote) puis « Réparé » (point vert) */
+.bento-status {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 7px;
+  margin-top: 14px;
+  padding: 5px 11px 5px 9px;
+  border-radius: 999px;
+  background: var(--color-bg);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ink-soft);
+}
+.bento-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: #34c759;
+  box-shadow: 0 0 0 4px rgb(52 199 89 / 0.18);
+  transition:
+    background-color 0.3s,
+    box-shadow 0.3s;
+}
+.bento-status[data-state="broken"] .bento-status-dot {
+  background: #ff3b30;
+  box-shadow: 0 0 0 4px rgb(255 59 48 / 0.16);
+  animation: bento-blink 1.1s ease-in-out infinite;
+}
+@keyframes bento-blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+.bento-art {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  min-height: 170px;
+  margin: 12px 0 10px;
+}
+.bento-art svg {
+  width: 100%;
+  height: 100%;
+  max-height: 190px;
+  overflow: visible;
+}
+.bento-tile--featured .bento-art svg {
+  max-height: 400px;
+}
+/* Éléments animés : transformations autour de leur propre centre (ou de leur bord gauche) */
+.bento-art :is([data-app], [data-check], [data-bolt], [data-btn], [data-drift], [data-tap-ring], [data-stick], [data-battery-fill], [data-progress]) {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.bento-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-brand-strong);
+}
+.bento-link svg {
+  transition: transform 0.3s var(--ease-expo);
+}
+.bento-tile:hover .bento-link svg {
+  transform: translateX(3px);
+}
+
+/* ----------------------------------------------- Cartes inclinables (data-tilt) */
+[data-tilt] {
+  position: relative;
+}
+[data-tilt]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(0 113 227 / 0.1), transparent 45%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+[data-tilt][data-hover="true"]::after {
+  opacity: 1;
+}
+
+/* ---------------------------------------- Cadre lumineux qui tourne (estimateur) */
+.glow-frame {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 1.5px;
+  border-radius: calc(var(--radius-card) + 1.5px);
+  box-shadow: 0 40px 90px -50px rgb(0 113 227 / 0.45);
+}
+.glow-frame::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 50%;
+  width: max(200%, 1400px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: conic-gradient(transparent 0 62%, rgb(0 113 227 / 0.9) 76%, #2997ff 82%, transparent 90%);
+  animation: glow-spin 8s linear infinite;
+}
+@keyframes glow-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+/* ------------------- Cartes empilées (méthode, data-stack) : cartes noires sur #1d1d1f */
+.stack {
+  display: grid;
+  gap: 28px;
+}
+.stack-card {
+  --dim: 0;
+  position: sticky;
+  top: calc(96px + var(--i) * 18px);
+  display: flex;
+  flex-direction: column;
+  min-height: 250px;
+  overflow: hidden;
+  padding: 26px;
+  border: 1px solid rgb(255 255 255 / 0.06);
+  border-radius: 28px;
+  background: #000;
+  box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.9);
+  transform-origin: 50% 0;
+}
+@media (min-width: 1024px) {
+  .stack-card {
+    top: calc(128px + var(--i) * 26px);
+    min-height: 300px;
+    padding: 36px;
+  }
+}
+.stack-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #000;
+  opacity: var(--dim);
+  pointer-events: none;
+}
+.stack-number {
+  position: absolute;
+  right: 22px;
+  top: 10px;
+  font-family: var(--font-display);
+  font-size: clamp(84px, 11vw, 140px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.14);
+}
+.stack-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgb(41 151 255 / 0.14);
+  box-shadow: inset 0 0 0 1px rgb(41 151 255 / 0.3);
+  color: var(--color-sky);
+}
+
+/* ----------------------------------------------------- Appel final (accueil) */
+.cta-orb {
+  position: absolute;
+  z-index: -1;
+  right: -18%;
+  top: -45%;
+  width: min(780px, 95%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: conic-gradient(#0071e3, #2997ff, #7d5cff, #bf5af2, #0071e3);
+  filter: blur(90px);
+  opacity: 0.32;
+  animation: glow-spin 18s linear infinite;
+  pointer-events: none;
+}

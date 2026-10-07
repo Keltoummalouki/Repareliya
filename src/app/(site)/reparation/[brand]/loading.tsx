@@ -12,7 +12,7 @@ export default function BrandLoading() {
           <Skeleton className="mt-5 h-10 w-4/5 max-w-sm sm:h-12" />
           <Skeleton className="mt-4 h-4 w-full max-w-md" />
         </div>
-        <Skeleton className="h-11 w-48 shrink-0 rounded-[10px]" />
+        <Skeleton className="h-11 w-48 shrink-0 rounded-full" />
       </div>
       {repeat(2, (section) => (
         <section key={section} className="mt-12">

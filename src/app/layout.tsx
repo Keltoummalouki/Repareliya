@@ -1,12 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Manrope } from "next/font/google";
+import { Inter } from "next/font/google";
 import { ThemeColorSync, ThemedToaster } from "@/components/theme";
 import { siteUrl } from "@/lib/env";
+import { introScript } from "@/lib/page-gate";
 import { DARK_QUERY, THEME_COLORS, themeScript } from "@/lib/theme";
 import "./globals.css";
 
-const dmSans = DM_Sans({ variable: "--font-dm-sans", subsets: ["latin"], display: "swap" });
-const manrope = Manrope({ variable: "--font-manrope", subsets: ["latin"], display: "swap" });
+// Typographie à la manière d’apple.com : SF Pro, police du système, sur les appareils Apple
+// (-apple-system dans --font-sans) ; ailleurs Inter, sa plus proche cousine libre de droits.
+// L’axe « opsz » donne des coupes plus serrées aux grandes tailles, comme SF Pro Display.
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"], display: "swap", axes: ["opsz"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -30,10 +33,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // data-theme est posé par themeScript avant l’hydratation
-    <html lang="fr" className={`${dmSans.variable} ${manrope.variable} h-full antialiased`} suppressHydrationWarning>
+    // data-theme (et data-intro au premier passage) sont posés par les scripts de <head> avant l’hydratation
+    <html lang="fr" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: introScript }} />
       </head>
       <body className="min-h-full flex flex-col">
         {children}

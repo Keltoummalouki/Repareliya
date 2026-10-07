@@ -6,29 +6,23 @@ import { repeat, Skeleton, SkeletonScreen } from "@/components/ui/skeleton";
 export default function HomeLoading() {
   return (
     <SkeletonScreen>
-      {/* Hero */}
-      <section className="container-page grid items-center gap-10 pb-14 pt-10 sm:pt-14 lg:grid-cols-[1.02fr_1fr] lg:gap-14 lg:pb-20">
-        <div>
-          <Skeleton className="h-3 w-72 max-w-full" />
-          <div className="mt-7 space-y-3">
-            <Skeleton className="h-10 w-11/12 sm:h-14 lg:h-16" />
-            <Skeleton className="h-10 w-4/5 sm:h-14 lg:h-16" />
-            <Skeleton className="h-10 w-3/5 sm:h-14 lg:h-16" />
+      {/* Scène 3D : noire dans les deux thèmes, sous l’en-tête transparent (squelette en clair sur noir) */}
+      <section className="-mt-16 flex min-h-svh items-center bg-night pb-14 pt-24 [--color-ink:#f5f5f7] sm:-mt-18">
+        <div className="container-page">
+          <Skeleton className="h-5 w-72 max-w-full" />
+          <div className="mt-6 max-w-2xl space-y-3">
+            <Skeleton className="h-10 w-11/12 sm:h-14 lg:h-20" />
+            <Skeleton className="h-10 w-4/5 sm:h-14 lg:h-20" />
           </div>
           <div className="mt-7 max-w-lg space-y-2.5">
             <Skeleton className="h-4.5" />
             <Skeleton className="h-4.5 w-4/5" />
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Skeleton className="h-13 w-52 rounded-[10px]" />
-            <Skeleton className="h-13 w-36 rounded-[10px]" />
-          </div>
-          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3">
-            <Skeleton className="h-4 w-44" />
-            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-13 w-52 rounded-full" />
+            <Skeleton className="h-13 w-36 rounded-full" />
           </div>
         </div>
-        <Skeleton className="aspect-[3/2] rounded-[22px]" />
       </section>
 
       {/* Types d’appareils */}

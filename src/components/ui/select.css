@@ -3,7 +3,7 @@
 .custom-select-native { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden; clip-path: inset(50%); }
 .custom-select-trigger { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; cursor: pointer; }
 .custom-select-trigger:disabled { cursor: not-allowed; }
-.custom-select-trigger[aria-expanded="true"] { border-color: var(--color-brand-strong); box-shadow: 0 0 0 3px rgb(241 92 53 / .12); }
+.custom-select-trigger[aria-expanded="true"] { border-color: var(--color-brand); box-shadow: 0 0 0 4px rgb(0 113 227 / .18); }
 .custom-select-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .custom-select-popover { position: fixed; inset: auto; margin: 0; padding: 0; overflow: hidden; border: 1px solid var(--color-line); border-radius: 12px; background: var(--color-surface); color: var(--color-ink); box-shadow: 0 8px 32px -8px rgb(32 35 32 / .22), 0 2px 6px rgb(32 35 32 / .05); font-family: var(--font-sans); font-size: 14px; }
 .custom-select-popover:popover-open { display: flex; flex-direction: column; animation: select-appear .12s ease-out; }

@@ -23,8 +23,9 @@ export function SectionHeading({
     <div data-reveal="heading" className={clsx("mb-8 flex flex-col gap-5 sm:mb-10 md:flex-row md:items-end md:justify-between", className)}>
       <div className="max-w-2xl">
         <p className="eyebrow">{eyebrow}</p>
-        <h2 className="mt-4 text-[30px] font-extrabold leading-[1.08] sm:text-[44px]">{title}</h2>
-        {text ? <p className="mt-3 max-w-xl leading-relaxed text-ink-soft sm:mt-4">{text}</p> : null}
+        {/* Titre de section à la manière d’apple.com : grand, semi-gras, approche serrée */}
+        <h2 className="mt-2 text-[32px] font-semibold leading-[1.06] tracking-[-0.03em] sm:text-[48px]">{title}</h2>
+        {text ? <p className="mt-3 max-w-xl text-[17px] leading-relaxed text-muted sm:mt-4">{text}</p> : null}
       </div>
       {/* Conteneur : sur mobile, le bouton garde sa largeur au lieu de s’étirer sur toute la ligne */}
       {action ? <div className="md:shrink-0">{action}</div> : null}
@@ -32,9 +33,10 @@ export function SectionHeading({
   );
 }
 
-export function Stars({ rating, className }: { rating: number; className?: string }) {
+/** `animated` : les étoiles s’allument une à une à l’apparition (data-stars, components/site/motion.tsx). */
+export function Stars({ rating, className, animated }: { rating: number; className?: string; animated?: boolean }) {
   return (
-    <span className={clsx("inline-flex gap-0.5", className)} aria-label={`${rating} sur 5`} role="img">
+    <span className={clsx("inline-flex gap-0.5", className)} aria-label={`${rating} sur 5`} role="img" data-stars={animated ? "" : undefined}>
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
@@ -61,7 +63,7 @@ export type ReviewCardData = {
 
 export function ReviewCard({ review }: { review: ReviewCardData }) {
   return (
-    <figure className="card flex h-full flex-col p-5 sm:p-6">
+    <figure data-tilt="5" className="card flex h-full flex-col p-5 sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <Stars rating={review.rating} />
         {review.source === "google" ? (
@@ -114,7 +116,7 @@ export function RealisationCard({ item }: { item: RealisationCardData }) {
   const cover = item.after_image_url ?? item.images[0] ?? item.before_image_url;
   const hasBeforeAfter = Boolean(item.before_image_url && item.after_image_url);
   return (
-    <article className="group card overflow-hidden">
+    <article data-tilt="5" data-cursor-label="Voir" className="group card overflow-hidden">
       <div className="relative aspect-[4/3] overflow-hidden bg-subtle">
         {hasBeforeAfter ? (
           <div className="grid h-full grid-cols-2">
@@ -167,7 +169,7 @@ export function AccessoryCard({ item, currency }: { item: AccessoryCardData; cur
   const price = item.price === null ? null : Number(item.price);
   const compare = item.compare_at_price === null ? null : Number(item.compare_at_price);
   return (
-    <article className="card group flex flex-col overflow-hidden">
+    <article data-tilt="6" className="card group flex flex-col overflow-hidden">
       <div className="relative aspect-square overflow-hidden bg-subtle">
         {item.image_url ? (
           <img src={item.image_url} alt={item.name} className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" loading="lazy" />

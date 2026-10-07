@@ -24,7 +24,7 @@ export function SectionHeadingSkeleton({ text, action, className }: { text?: boo
           </div>
         ) : null}
       </div>
-      {action ? <Skeleton className="h-11 w-48 shrink-0 rounded-[10px]" /> : null}
+      {action ? <Skeleton className="h-11 w-48 shrink-0 rounded-full" /> : null}
     </div>
   );
 }
@@ -185,7 +185,7 @@ export function DevisFormSkeleton() {
             <Skeleton key={i} className="h-16 rounded-xl" />
           ))}
         </div>
-        <Skeleton className="mt-6 h-13 w-full rounded-[10px]" />
+        <Skeleton className="mt-6 h-13 w-full rounded-full" />
       </FormSectionSkeleton>
     </div>
   );

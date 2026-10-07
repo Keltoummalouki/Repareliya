@@ -3,77 +3,96 @@
 /* dark: suit data-theme sur <html>, posé avant le rendu par themeScript (src/lib/theme.ts) */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
+/* Palette et typographie inspirées d’apple.com : noir, gris #1d1d1f / #f5f5f7, texte secondaire
+   #86868b, bleu #0071e3 pour les actions et #0066cc / #2997ff pour les liens. */
 @theme {
-  --color-bg: #f9f9f6;
+  --color-bg: #f5f5f7;
   --color-surface: #ffffff;
-  --color-subtle: #f1f2ec;
-  --color-ink: #202320;
-  --color-ink-soft: #3d423b;
-  --color-muted: #6b6e67;
-  --color-faint: #9a9d95;
-  --color-line: #e4e5df;
-  --color-line-strong: #cfd1c8;
-  --color-brand: #f15c35;
-  --color-brand-strong: #cc4119;
-  --color-brand-dark: #a8330f;
-  --color-brand-soft: #fdebe4;
-  --color-brand-soft-hover: #fbd9cc;
-  --color-success: #1d7a50;
-  --color-success-soft: #e3f4ea;
-  --color-warning: #9a6200;
-  --color-warning-soft: #fdf1d8;
-  --color-danger: #b42318;
-  --color-danger-soft: #fde8e6;
-  --color-info: #2456a6;
-  --color-info-soft: #e5edfa;
+  --color-subtle: #e8e8ed;
+  --color-ink: #1d1d1f;
+  --color-ink-soft: #424245;
+  --color-muted: #6e6e73;
+  --color-faint: #86868b;
+  --color-line: #e3e3e8;
+  --color-line-strong: #d2d2d7;
+  --color-brand: #0071e3;
+  --color-brand-strong: #0066cc;
+  --color-brand-dark: #004f9f;
+  --color-brand-soft: #e8f1fc;
+  --color-brand-soft-hover: #d6e7fa;
+  --color-success: #248a3d;
+  --color-success-soft: #e8f5ec;
+  --color-warning: #b25000;
+  --color-warning-soft: #fdf1e3;
+  --color-danger: #d70015;
+  --color-danger-soft: #fde8ea;
+  --color-info: #0066cc;
+  --color-info-soft: #e8f1fc;
   --color-whatsapp: #128c4a;
+  /* Bouton d’action principal (« Acheter » sur apple.com) : même bleu dans les deux thèmes */
+  --color-cta: #0071e3;
+  --color-cta-hover: #0077ed;
   /* Texte posé sur un aplat plein (ink, brand-strong, danger…) */
   --color-on-fill: #ffffff;
   /* Toujours sombre, quel que soit le thème (bandeaux, légendes sur photo) */
-  --color-charcoal: #202320;
-  --color-scrim: rgb(32 35 32 / 0.4);
-  --color-selection: #ffd4c5;
+  --color-charcoal: #1d1d1f;
+  --color-scrim: rgb(0 0 0 / 0.4);
+  --color-selection: #b4d5fe;
+  /* Scènes sombres « produit » (accueil 3D, rideaux, méthode), identiques dans les deux thèmes */
+  --color-night: #000000;
+  --color-night-soft: #1d1d1f;
+  /* Texte clair et accents bleus posés sur ces scènes sombres (fixes, quel que soit le thème) */
+  --color-snow: #f5f5f7;
+  --color-sky: #2997ff;
 
-  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  /* SF Pro sur les appareils Apple (police du système), Inter ailleurs : la plus proche, libre de droits */
+  --font-sans: -apple-system, BlinkMacSystemFont, var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  /* Titres en semi-gras, comme apple.com : « bold » et « extrabold » restent à 600 */
+  --font-weight-bold: 600;
+  --font-weight-extrabold: 600;
 
-  --radius-card: 14px;
-  --shadow-card: 0 1px 2px rgb(32 35 32 / 0.04), 0 8px 24px -12px rgb(32 35 32 / 0.12);
-  --shadow-float: 0 18px 50px -20px rgb(32 35 32 / 0.35);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  --radius-card: 18px;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.03), 0 10px 30px -14px rgb(0 0 0 / 0.14);
+  --shadow-float: 0 18px 50px -20px rgb(0 0 0 / 0.3);
 }
 
 /* Thème sombre : réglage de l’appareil par défaut, ou choix du visiteur via le bouton de thème.
    En sombre, les teintes « strong/dark » deviennent plus claires pour garder le contraste. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --color-bg: #121412;
-  --color-surface: #1b1e1b;
-  --color-subtle: #252924;
-  --color-ink: #ecede8;
-  --color-ink-soft: #c3c6be;
-  --color-muted: #999c93;
-  --color-faint: #6d7169;
-  --color-line: #2c302b;
-  --color-line-strong: #3d423b;
-  --color-brand: #f36b45;
-  --color-brand-strong: #f47a55;
-  --color-brand-dark: #ffa183;
-  --color-brand-soft: #3b2119;
-  --color-brand-soft-hover: #4d2b1f;
-  --color-success: #52c48c;
-  --color-success-soft: #15291e;
-  --color-warning: #e5ab45;
-  --color-warning-soft: #2f2513;
-  --color-danger: #f47c72;
-  --color-danger-soft: #3a1d1a;
-  --color-info: #82acf2;
-  --color-info-soft: #18243a;
-  --color-on-fill: #121412;
+  --color-bg: #000000;
+  --color-surface: #1d1d1f;
+  --color-subtle: #2c2c2e;
+  --color-ink: #f5f5f7;
+  --color-ink-soft: #d2d2d7;
+  --color-muted: #a1a1a6;
+  --color-faint: #86868b;
+  --color-line: #2c2c2e;
+  --color-line-strong: #424245;
+  --color-brand: #2997ff;
+  --color-brand-strong: #2997ff;
+  --color-brand-dark: #8ec5ff;
+  --color-brand-soft: #0d2441;
+  --color-brand-soft-hover: #133159;
+  --color-success: #30d158;
+  --color-success-soft: #0e2a17;
+  --color-warning: #ffb340;
+  --color-warning-soft: #2e2108;
+  --color-danger: #ff6961;
+  --color-danger-soft: #3a1214;
+  --color-info: #64b5ff;
+  --color-info-soft: #0d2441;
+  --color-on-fill: #000000;
   --color-scrim: rgb(0 0 0 / 0.6);
-  --color-selection: #5c2a1b;
+  --color-selection: #0a4a8c;
 
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.5);
-  --shadow-float: 0 18px 50px -20px rgb(0 0 0 / 0.7);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 30px -14px rgb(0 0 0 / 0.7);
+  --shadow-float: 0 18px 50px -20px rgb(0 0 0 / 0.8);
 }
 
 @layer base {
@@ -86,11 +105,13 @@
     background: var(--color-bg);
     color: var(--color-ink);
     font-family: var(--font-sans);
+    font-optical-sizing: auto;
+    letter-spacing: -0.011em;
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.022em;
   }
   ::selection {
     background: var(--color-selection);
@@ -121,21 +142,15 @@
       padding-inline: max(32px, env(safe-area-inset-left)) max(32px, env(safe-area-inset-right));
     }
   }
+  /* Sur-titre à la manière d’apple.com : semi-gras, gris, sans capitales */
   .eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--color-ink);
-  }
-  .eyebrow::before {
-    content: "";
-    width: 22px;
-    height: 2px;
-    background: var(--color-brand);
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.016em;
+    color: var(--color-faint);
   }
   .card {
     background: var(--color-surface);
@@ -159,7 +174,7 @@
     min-height: 44px;
     border: 1px solid var(--color-line-strong);
     background: var(--color-surface);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 10px 12px;
     font-size: 15px;
     color: var(--color-ink);
@@ -170,8 +185,8 @@
   }
   .field-input:focus {
     outline: none;
-    border-color: var(--color-brand-strong);
-    box-shadow: 0 0 0 3px rgb(241 92 53 / 0.18);
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 4px rgb(0 113 227 / 0.2);
   }
   .field-input[aria-invalid="true"] {
     border-color: var(--color-danger);
@@ -285,3 +300,4 @@
     opacity: 1 !important;
   }
 }
+

@@ -2,7 +2,7 @@ export type Theme = "light" | "dark";
 
 export const THEME_STORAGE_KEY = "theme";
 export const DARK_QUERY = "(prefers-color-scheme: dark)";
-export const THEME_COLORS: Record<Theme, string> = { light: "#f9f9f6", dark: "#121412" };
+export const THEME_COLORS: Record<Theme, string> = { light: "#f5f5f7", dark: "#000000" };
 
 const key = JSON.stringify(THEME_STORAGE_KEY);
 

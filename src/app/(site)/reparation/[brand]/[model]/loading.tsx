@@ -10,8 +10,8 @@ export default function ModelLoading() {
         <div>
           <PageIntroSkeleton />
           <div className="mt-8 flex flex-wrap gap-3">
-            <Skeleton className="h-11 w-48 rounded-[10px]" />
-            <Skeleton className="h-11 w-36 rounded-[10px]" />
+            <Skeleton className="h-11 w-48 rounded-full" />
+            <Skeleton className="h-11 w-36 rounded-full" />
           </div>
         </div>
         <div className="card divide-y divide-line self-start">
