@@ -1,11 +1,13 @@
 import * as THREE from "three";
-import { roundedRectPath, seeded } from "./utils";
+import { cornerExtent, CORNER_POWER, ROUNDED_RECT_GLSL, roundedRectDistance, roundedRectPath, seeded } from "./utils";
 
 /*
  * Vitre brisée : un motif de fissures radial autour d’un point d’impact (triangulation de
  * Delaunay), chaque triangle devenant un éclat de verre épais. Tous les éclats tiennent dans une
  * seule géométrie ; c’est le GPU qui les écarte, les fait tourner et les ramène (uExplode),
  * dessine les fissures sur leurs arêtes et la vague lumineuse qui les « répare » (uHeal).
+ * Le contour exact de la vitre (coins continus, bord poli, sérigraphie noire) est tracé au pixel
+ * près par le shader : les éclats du pourtour débordent légèrement et sont rognés.
  */
 
 type Point = { x: number; y: number; boundary: number };
@@ -23,39 +25,52 @@ export type ShardUniforms = {
 /** Rayon de la vague de réparation pour uHeal = 1 : elle couvre toute la vitre depuis l’impact. */
 export const HEAL_REACH = 1.9;
 
-function insideRoundedRect(x: number, y: number, w: number, h: number, r: number) {
-  const qx = Math.abs(x) - (w / 2 - r);
-  const qy = Math.abs(y) - (h / 2 - r);
-  return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r < 0;
-}
-
 function shardPoints(w: number, h: number, r: number, impact: THREE.Vector2, density: number, rand: () => number) {
   const points: Point[] = [];
   // Contour : points régulièrement espacés, numérotés pour reconnaître les arêtes du bord.
   const outline = roundedRectPath(new THREE.Path(), w, h, r);
   const spaced = outline.getSpacedPoints(Math.round(44 * Math.max(0.7, density)));
   spaced.pop(); // le dernier point recouvre le premier
-  spaced.forEach((p, i) => points.push({ x: p.x * 0.99999, y: p.y * 0.99999, boundary: i }));
+  // Une corde coupe l’arrondi d’un coin : on pousse le polygone vers l’extérieur d’au moins la
+  // flèche de cette corde (rayon de courbure minimal ≈ 0,75 r), pour qu’il couvre toute la vitre.
+  const step = outline.getLength() / spaced.length;
+  const overhang = (step * step) / (8 * 0.75 * r) + 0.001;
+  spaced.forEach((p, i) => {
+    const prev = spaced[(i + spaced.length - 1) % spaced.length];
+    const next = spaced[(i + 1) % spaced.length];
+    const tx = next.x - prev.x;
+    const ty = next.y - prev.y;
+    const length = Math.hypot(tx, ty) || 1;
+    points.push({ x: p.x + (ty / length) * overhang, y: p.y - (tx / length) * overhang, boundary: i });
+  });
   const boundaryCount = points.length;
+  const inside = (x: number, y: number, margin: number) => roundedRectDistance(x, y, w, h, r) < -margin;
 
-  // Anneaux de plus en plus espacés autour de l’impact : éclats fins au centre, larges au loin.
+  // Casse d’un vrai impact : des fissures partent du point de choc en rayons qui ondulent et se
+  // dédoublent en s’éloignant ; des points posés le long de chaque rayon, à des distances de plus
+  // en plus espacées, en font des chaînes d’arêtes radiales (éclats fins au centre, larges au loin).
   points.push({ x: impact.x, y: impact.y, boundary: -1 });
+  const maxRays = Math.round(36 * density);
+  const startRays = Math.max(6, Math.round(9 * density));
+  let rays = Array.from({ length: startRays }, (_, k) => ((k + (rand() - 0.5) * 0.6) / startRays) * Math.PI * 2);
   for (let ring = 0; ring < 11; ring++) {
     const radius = 0.034 * 1.42 ** ring;
-    const count = Math.max(5, Math.round((6 + ring * 3.2) * density));
-    const offset = rand() * Math.PI * 2;
-    for (let k = 0; k < count; k++) {
-      const angle = offset + (k / count) * Math.PI * 2 + (rand() - 0.5) * ((Math.PI * 2) / count) * 0.7;
-      const distance = radius * (0.8 + rand() * 0.4);
+    if (ring % 2 === 1 && rays.length < maxRays) {
+      const gap = (Math.PI * 2) / rays.length;
+      rays = rays.flatMap((angle) => (rand() < 0.6 ? [angle - gap * 0.25, angle + gap * 0.25] : [angle]));
+    }
+    rays = rays.map((angle) => angle + (rand() - 0.5) * 0.09);
+    for (const angle of rays) {
+      const distance = radius * (0.88 + rand() * 0.24);
       const x = impact.x + Math.cos(angle) * distance;
       const y = impact.y + Math.sin(angle) * distance;
-      if (insideRoundedRect(x, y, w - 0.06, h - 0.06, r)) points.push({ x, y, boundary: -1 });
+      if (inside(x, y, 0.03)) points.push({ x, y, boundary: -1 });
     }
   }
-  for (let i = 0; i < Math.round(16 * density); i++) {
+  for (let i = 0; i < Math.round(6 * density); i++) {
     const x = (rand() - 0.5) * (w - 0.1);
     const y = (rand() - 0.5) * (h - 0.1);
-    if (insideRoundedRect(x, y, w - 0.08, h - 0.08, r)) points.push({ x, y, boundary: -1 });
+    if (inside(x, y, 0.04)) points.push({ x, y, boundary: -1 });
   }
   return { points, boundaryCount };
 }
@@ -203,23 +218,34 @@ export function buildShards(w: number, h: number, r: number, thickness: number, 
   return { geometry, edges: new Float32Array(crackSegments), count: triangles.length };
 }
 
-/** Matériau verre physique (reflets de l’environnement) dont le shader déplace chaque éclat. */
-export function createShardMaterial(uniforms: ShardUniforms) {
+/** Contour de la vitre et largeur de la sérigraphie noire qui court sous son pourtour. */
+export type GlassOutline = { w: number; h: number; r: number; ink: number };
+
+/**
+ * Matériau verre physique (reflets de l’environnement) dont le shader déplace chaque éclat.
+ * Mélange prémultiplié : le reflet s’ajoute à pleine intensité par-dessus ce qui est derrière,
+ * que le verre n’assombrit que très peu — comme une vraie vitre, au lieu d’un voile gris.
+ */
+export function createShardMaterial(uniforms: ShardUniforms, outline: GlassOutline) {
   // Diffusion noire : le verre ne renvoie que des reflets (pas de voile laiteux sous les lampes).
   const material = new THREE.MeshPhysicalMaterial({
     color: 0x000000,
     metalness: 0,
-    roughness: 0.05,
-    transparent: true,
-    opacity: 0.08,
-    clearcoat: 1,
-    clearcoatRoughness: 0.04,
-    ior: 1.52,
+    roughness: 0.035,
+    ior: 1.5,
     specularIntensity: 1,
-    envMapIntensity: 1.15,
+    transparent: true,
     side: THREE.DoubleSide,
     depthWrite: false,
+    blending: THREE.CustomBlending,
+    blendSrc: THREE.OneFactor,
+    blendDst: THREE.OneMinusSrcAlphaFactor,
+    blendSrcAlpha: THREE.OneFactor,
+    blendDstAlpha: THREE.OneMinusSrcAlphaFactor,
   });
+  const vec2 = (x: number, y: number) => `vec2(${x.toFixed(5)}, ${y.toFixed(5)})`;
+  const half = vec2(outline.w / 2, outline.h / 2);
+  const corner = cornerExtent(outline.w, outline.h, outline.r).toFixed(5);
 
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
@@ -236,6 +262,9 @@ export function createShardMaterial(uniforms: ShardUniforms) {
         varying vec3 vBary;
         varying vec2 vGlassPos;
         varying float vShardT;
+        varying float vFace;
+        varying vec3 vAxisX;
+        varying vec3 vAxisY;
         mat3 rotationAxis(vec3 axis, float angle) {
           axis = normalize(axis);
           float s = sin(angle);
@@ -274,7 +303,11 @@ export function createShardMaterial(uniforms: ShardUniforms) {
         /* glsl */ `
         vec3 transformed = shardRot * (position - aCenter) + aCenter + shardOffset;
         vBary = aBary;
-        vGlassPos = position.xy;`,
+        vGlassPos = position.xy;
+        // Face avant (+1), arrière (−1) ou tranche (0), et axes de l’éclat en repère vue.
+        vFace = normal.z;
+        vAxisX = normalize(normalMatrix * (shardRot * vec3(1.0, 0.0, 0.0)));
+        vAxisY = normalize(normalMatrix * (shardRot * vec3(0.0, 1.0, 0.0)));`,
       );
 
     shader.fragmentShader = shader.fragmentShader
@@ -287,14 +320,40 @@ export function createShardMaterial(uniforms: ShardUniforms) {
         uniform vec2 uImpact;
         varying vec3 vBary;
         varying vec2 vGlassPos;
-        varying float vShardT;`,
+        varying float vShardT;
+        varying float vFace;
+        varying vec3 vAxisX;
+        varying vec3 vAxisY;
+        ${ROUNDED_RECT_GLSL}
+        float crackHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+        float crackNoise(vec2 p) {
+          vec2 i = floor(p);
+          vec2 f = fract(p);
+          vec2 u = f * f * (3.0 - 2.0 * f);
+          return mix(mix(crackHash(i), crackHash(i + vec2(1.0, 0.0)), u.x), mix(crackHash(i + vec2(0.0, 1.0)), crackHash(i + vec2(1.0, 1.0)), u.x), u.y);
+        }`,
+      )
+      .replace(
+        "#include <normal_fragment_maps>",
+        /* glsl */ `#include <normal_fragment_maps>
+        // Distance au bord de la vitre (négative à l’intérieur).
+        float glassEdge = roundedRectDistance(vGlassPos, ${half}, ${corner});
+        // Bord poli « 2,5D » : sur le dernier millimètre et demi, la face avant s’arrondit vers
+        // l’extérieur et accroche la lumière en un filet net, comme sur une vraie vitre de téléphone.
+        float roll = smoothstep(-0.0016, 0.0, glassEdge) * step(0.5, vFace);
+        if (roll > 0.0) {
+          vec2 q = max(abs(vGlassPos) - ${half} + ${corner}, 0.0);
+          vec2 outward = q.x > 0.0 && q.y > 0.0 ? pow(q, vec2(${(CORNER_POWER - 1).toFixed(5)})) : (q.x > 0.0 ? vec2(1.0, 0.0) : vec2(0.0, 1.0));
+          outward = normalize(outward) * sign(vGlassPos);
+          normal = normalize(mix(normal, normalize(vAxisX * outward.x + vAxisY * outward.y), roll * roll * 0.9));
+        }`,
       )
       .replace(
         "#include <opaque_fragment>",
         /* glsl */ `
-        // Fissures : les arêtes des éclats, d’une largeur constante à l’écran.
+        // Fissures : les arêtes des éclats, d’une finesse constante à l’écran.
         vec3 baryWidth = fwidth(vBary);
-        vec3 baryEdge = smoothstep(vec3(0.0), baryWidth * 1.3, vBary);
+        vec3 baryEdge = smoothstep(vec3(0.0), baryWidth * 0.95, vBary);
         float crackLine = 1.0 - min(min(baryEdge.x, baryEdge.y), baryEdge.z);
         // Vague de réparation : elle part de l’impact et efface les fissures sur son passage.
         float fromImpact = length(vGlassPos - uImpact);
@@ -302,19 +361,58 @@ export function createShardMaterial(uniforms: ShardUniforms) {
         float broken = smoothstep(healRadius - 0.05, healRadius, fromImpact);
         float waveFront = (1.0 - smoothstep(0.0, 0.06, abs(fromImpact - healRadius))) * step(0.0005, uHeal) * (1.0 - step(0.9995, uHeal));
         // Les fissures se lisent sur la vitre en place ; sur les éclats en vol, il ne reste qu’un liseré.
-        float crack = crackLine * broken * uCrack * (1.0 - vShardT * 0.75);
-        outgoingLight += vec3(1.0, 0.92, 0.82) * crack * 1.2;
-        outgoingLight += vec3(0.16, 0.5, 1.0) * waveFront * 2.8;
-        float shine = dot(outgoingLight, vec3(0.299, 0.587, 0.114));
-        diffuseColor.a = clamp(diffuseColor.a + shine * 0.16 + crack * 0.8 + waveFront * 0.9, 0.0, 0.85);
-        // Vitre réparée et en place : un seul panneau lisse, les tranches internes des éclats disparaissent.
+        float crack = crackLine * broken * uCrack * (1.0 - vShardT * 0.9);
+
+        // Une cassure n’accroche la lumière que là où sa face regarde une lampe : l’éclat varie le long
+        // de chaque fissure et glisse quand le téléphone tourne ; il faiblit loin de l’impact.
+        float glint = smoothstep(0.45, 0.9, crackNoise(vGlassPos * 26.0 + normal.xy * 4.0));
+        float crackLight = crack * (0.16 + 0.84 * glint) * mix(1.0, 0.4, smoothstep(0.12, 0.9, fromImpact));
+        // Orientation de l’arête la plus proche, dans le plan de la vitre : les vraies fissures sont
+        // radiales (et concentriques tout près de l’impact) ; les arêtes en biais restent discrètes.
+        mat2 glassToScreen = mat2(dFdx(vGlassPos), dFdy(vGlassPos));
+        if (abs(determinant(glassToScreen)) > 1e-14) {
+          vec3 bdx = dFdx(vBary);
+          vec3 bdy = dFdy(vBary);
+          vec2 db = vBary.x < min(vBary.y, vBary.z) ? vec2(bdx.x, bdy.x) : (vBary.y < vBary.z ? vec2(bdx.y, bdy.y) : vec2(bdx.z, bdy.z));
+          vec2 edgeNormal = inverse(transpose(glassToScreen)) * db;
+          vec2 outward = vGlassPos - uImpact;
+          float align = abs(dot(normalize(edgeNormal), outward / max(length(outward), 1e-4)));
+          float radial = 1.0 - smoothstep(0.3, 0.62, align);
+          float ring = smoothstep(0.72, 0.95, align) * (1.0 - smoothstep(0.1, 0.32, fromImpact));
+          crackLight *= mix(0.14, 1.0, max(radial, ring));
+        }
+
+        float side = 1.0 - abs(vFace);
+        // Face arrière collée à la dalle (aucun reflet) tant que l’éclat est en place.
+        float bonded = step(vFace, -0.5) * (1.0 - vShardT);
+        // Vitre en place encore intacte (avant l’impact) ou déjà réparée (derrière la vague) : un seul
+        // panneau, les tranches internes des éclats ne se voient pas.
         float innerFace = step(8.5, vBary.x);
-        diffuseColor.a *= 1.0 - innerFace * uHeal * (1.0 - vShardT);
-        // Liseré de Fresnel : vue de biais (dos, vue éclatée), la vitre se dessine par ses reflets.
+        float healed = innerFace * max(max(uHeal * uHeal, 1.0 - broken), side * (1.0 - uCrack)) * (1.0 - vShardT);
+
+        vec3 light = outgoingLight * (1.0 - bonded);
+        float alpha = 0.035 * (1.0 - bonded);
+        // Sérigraphie noire sous le pourtour : opaque, le reflet du verre passe par-dessus.
+        float aa = fwidth(glassEdge) + 1e-6;
+        float ink = smoothstep(-${outline.ink.toFixed(5)} - aa, -${outline.ink.toFixed(5)} + aa, glassEdge) * (1.0 - side) * (1.0 - bonded);
+        alpha = mix(alpha, 1.0, ink);
+        // Tranches des éclats : le verre épais s’y allume d’un liseré vert d’eau.
         float grazing = pow(1.0 - abs(dot(normalize(vViewPosition), normal)), 3.0);
-        outgoingLight += vec3(0.78, 0.84, 0.95) * grazing * uSheen * 0.9;
-        diffuseColor.a = clamp(diffuseColor.a + (grazing * 0.55 + 0.07) * uSheen * (1.0 - innerFace), 0.0, 0.9);
-        #include <opaque_fragment>`,
+        light += vec3(0.42, 0.62, 0.58) * side * (1.0 - healed) * (0.015 + 0.3 * grazing);
+        alpha += side * (1.0 - healed) * 0.12;
+        light += vec3(1.0, 0.95, 0.9) * crackLight * 0.9;
+        alpha = max(alpha, crack * 0.15 + crackLight * 0.6);
+        light += vec3(0.16, 0.5, 1.0) * waveFront * 2.4;
+        alpha = max(alpha, waveFront * 0.55);
+        // Liseré de Fresnel : vue de biais (dos, vue éclatée), la vitre se dessine aussi par ses bords.
+        light += vec3(0.78, 0.84, 0.95) * grazing * uSheen * 0.5 * (1.0 - innerFace);
+        alpha += (grazing * 0.3 + 0.04) * uSheen * (1.0 - innerFace);
+        light *= 1.0 - healed;
+        alpha *= 1.0 - healed;
+        // Contour exact de la vitre, lissé au pixel : ce qui déborde est rogné.
+        float coverage = 1.0 - smoothstep(-aa, aa, glassEdge);
+        diffuseColor.a = clamp(alpha, 0.0, 1.0) * coverage;
+        gl_FragColor = vec4(light * coverage, diffuseColor.a);`,
       );
   };
   material.customProgramCacheKey = () => "repareliya-shards";

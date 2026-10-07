@@ -2,7 +2,6 @@ import { createTimeline, type Timeline } from "animejs";
 // Adaptateur three.js d’anime.js : position (x, y, z), rotations en degrés, échelle… directement sur les Object3D.
 import "animejs/adapters/three";
 import * as THREE from "three";
-import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { buildPhone, LAYERS, PHONE, type PhoneModel } from "./phone-model";
 import { HEAL_REACH } from "./shatter";
 import { damp, easeInOut, easeOut, lerp, range } from "./utils";
@@ -70,6 +69,89 @@ const DUST_FRAGMENT = /* glsl */ `
   }
 `;
 
+/** Diffuseur de boîte à lumière : plein au centre, bords adoucis sur `edge` (en fraction de la taille). */
+function softboxTexture(edge: number) {
+  const size = 64;
+  const data = new Uint8Array(size * size * 4);
+  const fade = (t: number) => (t >= 1 ? 1 : t * t * (3 - 2 * t));
+  for (let j = 0; j < size; j++) {
+    for (let i = 0; i < size; i++) {
+      const u = (i + 0.5) / size;
+      const v = (j + 0.5) / size;
+      const value = Math.round(255 * fade(Math.min(u, 1 - u) / edge) * fade(Math.min(v, 1 - v) / edge));
+      data.set([value, value, value, 255], (j * size + i) * 4);
+    }
+  }
+  const texture = new THREE.DataTexture(data, size, size);
+  texture.magFilter = THREE.LinearFilter;
+  texture.minFilter = THREE.LinearFilter;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+/**
+ * Studio photo, rendu une fois en carte de reflets : pièce presque noire (un métal ou une vitre ne
+ * se voient que par ce qu’ils reflètent), grande boîte à lumière au plafond, deux boîtes verticales
+ * de part et d’autre de l’objectif (le reflet doux qui glisse sur l’écran quand le téléphone
+ * tourne), deux rubans latéraux qui tracent les arêtes du titane, un panneau gris pour le modelé
+ * des flancs, et un ruban bleu en contre-jour, signature des visuels produit d’apple.com.
+ */
+function createStudio() {
+  const studio = new THREE.Scene();
+  const dome = new THREE.SphereGeometry(30, 48, 24);
+  const shade = new Float32Array(dome.attributes.position.count * 3);
+  for (let i = 0; i < dome.attributes.position.count; i++) {
+    const y = dome.attributes.position.getY(i) / 30;
+    const z = dome.attributes.position.getZ(i) / 30;
+    // Noir au zénith, légère lueur à l’horizon, sol sombre…
+    let value = y > 0 ? lerp(0.03, 0.004, Math.min(1, y * 2.2)) : lerp(0.03, 0.01, Math.min(1, -y * 3));
+    // …et des murs gris clair sur les côtés et derrière : le titane s’y éclaire, alors que
+    // l’écran, tourné vers l’objectif, ne reflète que le noir de l’avant du studio.
+    value += 0.3 * Math.max(0, 1 - Math.abs(y) * 1.6) * Math.min(1, Math.max(0, (0.45 - z) / 0.7));
+    shade.set([value, value, value * 1.05], i * 3);
+  }
+  dome.setAttribute("color", new THREE.BufferAttribute(shade, 3));
+  studio.add(new THREE.Mesh(dome, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
+
+  const soft = softboxTexture(0.22);
+  const crisp = softboxTexture(0.06);
+  const light = (w: number, h: number, intensity: number, [x, y, z]: number[], map: THREE.Texture, color = 0xffffff) => {
+    const panel = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(intensity), map, side: THREE.DoubleSide }),
+    );
+    panel.position.set(x, y, z);
+    panel.lookAt(0, 0, 0);
+    studio.add(panel);
+  };
+  light(9, 5, 1.6, [0, 7, 1.5], soft); // plafond
+  // Grand réflecteur faible derrière l’objectif : le titane (qui renvoie ~60 % de la lumière) s’y
+  // éclaire, la vitre (4 %) à peine, l’écran éteint reste noir.
+  light(12, 7, 0.22, [0, 0.8, 8], soft);
+  // Les deux boîtes avant sont placées pour que leur bord traverse l’écran dans la pose d’accueil
+  // (téléphone tourné vers la droite) et dans la pose finale (tourné vers la gauche) : un reflet
+  // en dégradé qui glisse quand on fait défiler ou qu’on bouge la souris, pas un voile uniforme.
+  light(2.2, 5, 1.3, [5.7, 1.45, 3.75], soft); // avant droite
+  light(1.8, 5, 1.8, [-3.9, 1, 5.8], soft); // avant gauche
+  light(0.45, 9, 5, [-7, 0.8, 0.6], crisp); // ruban gauche
+  light(0.45, 9, 4, [7, 0.8, -1.2], crisp); // ruban droit
+  light(6, 4, 0.45, [-4.5, 2.2, -5], soft); // panneau gris, arrière gauche
+  light(0.5, 8, 3, [-1.8, 1.2, -7], crisp, 0x3d8bff); // ruban bleu en contre-jour
+
+  return {
+    studio,
+    dispose() {
+      studio.traverse((object) => {
+        const mesh = object as THREE.Mesh;
+        mesh.geometry?.dispose();
+        (mesh.material as THREE.Material | undefined)?.dispose();
+      });
+      soft.dispose();
+      crisp.dispose();
+    },
+  };
+}
+
 export class PhoneScene {
   private renderer: THREE.WebGLRenderer;
   private scene = new THREE.Scene();
@@ -112,37 +194,22 @@ export class PhoneScene {
     this.renderer.toneMappingExposure = 1.05;
     this.labels = labels;
 
-    // Studio neutre pour les reflets, plus un bandeau bleu et un bandeau blanc : le chrome et le
-    // titane s’y irisent comme sur les visuels produit d’apple.com.
-    const room = new RoomEnvironment();
-    const panels = [
-      { color: new THREE.Color(0x2b7bff).multiplyScalar(4.5), position: new THREE.Vector3(-5, 1.5, -3) },
-      { color: new THREE.Color(0xffffff).multiplyScalar(3), position: new THREE.Vector3(5, 2.5, 2) },
-    ].map(({ color, position }) => {
-      const panel = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.4), new THREE.MeshBasicMaterial({ color }));
-      panel.position.copy(position);
-      panel.lookAt(0, 0, 0);
-      room.add(panel);
-      return panel;
-    });
+    const studio = createStudio();
     const pmrem = new THREE.PMREMGenerator(this.renderer);
-    this.envTarget = pmrem.fromScene(room, 0.035);
+    this.envTarget = pmrem.fromScene(studio.studio, 0.02);
     this.scene.environment = this.envTarget.texture;
-    this.scene.environmentIntensity = 0.85;
-    room.dispose();
-    for (const panel of panels) {
-      panel.geometry.dispose();
-      (panel.material as THREE.Material).dispose();
-    }
+    studio.dispose();
     pmrem.dispose();
 
-    const key = new THREE.DirectionalLight(0xffffff, 1.6);
+    // Les reflets du studio font l’essentiel ; ces lampes modèlent surtout les pièces mates
+    // (vitre arrière, batterie, carte mère) et détachent la silhouette du fond.
+    const key = new THREE.DirectionalLight(0xffffff, 1.1);
     key.position.set(2.5, 3, 4);
-    const rim = new THREE.DirectionalLight(0x4d9bff, 3);
+    const rim = new THREE.DirectionalLight(0xc4dcff, 0.9);
     rim.position.set(-3, 1.2, -2.5);
-    const back = new THREE.DirectionalLight(0xffffff, 1.2);
+    const back = new THREE.DirectionalLight(0xffffff, 0.7);
     back.position.set(3.2, -1.2, -2);
-    this.scene.add(key, rim, back, new THREE.HemisphereLight(0xffffff, 0x080a10, 0.35));
+    this.scene.add(key, rim, back, new THREE.HemisphereLight(0xffffff, 0x080a10, 0.3));
 
     this.camera.position.set(0, 0, 5);
     this.scene.add(this.rig);
@@ -367,6 +434,8 @@ export class PhoneScene {
     m.screen.uniforms.uPower.value = Math.max(power, this.introPower.value);
     m.screen.uniforms.uBroken.value = 1 - power;
     m.screen.uniforms.uNotify.value = notify;
+    // Sous la vitre collée, la dalle n’a pas de reflet propre ; à nu (vitre envolée), si.
+    m.screen.material.specularIntensity = m.shardUniforms.uExplode.value * 0.6;
 
     let x = lerp(L.heroX, L.centerX, leave);
     let y = lerp(L.heroY, L.centerY, leave);

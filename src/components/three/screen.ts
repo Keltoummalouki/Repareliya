@@ -3,9 +3,11 @@ import { LOGO_PATH } from "@/components/icons";
 import { siteFont } from "./utils";
 
 /*
- * Écran du téléphone : un shader qui affiche une dalle morte (colonnes de pixels, tache
- * d’encre autour de l’impact) tant que l’écran est cassé, puis s’allume depuis le centre et
- * révèle un fond d’écran orange en mouvement, l’écran de verrouillage et une notification.
+ * Écran du téléphone : une dalle OLED physique (noire, avec son propre reflet quand la vitre
+ * n’est plus là) dont l’image est calculée par un shader. Cassée, elle ne grésille (colonnes de
+ * pixels, tache d’encre autour de l’impact) que tant qu’elle reçoit encore du courant ; éteinte,
+ * elle est d’un noir profond. Puis elle s’allume depuis le centre et révèle un fond d’écran en
+ * mouvement, l’écran de verrouillage et une notification.
  */
 
 export type ScreenUniforms = {
@@ -57,7 +59,8 @@ function drawAppIcon(ctx: CanvasRenderingContext2D, x: number, y: number, size: 
 
 export class PhoneScreen {
   readonly uniforms: ScreenUniforms;
-  readonly material: THREE.ShaderMaterial;
+  /** Image en émission ; `specularIntensity` règle le reflet propre de la dalle (0 sous la vitre). */
+  readonly material: THREE.MeshPhysicalMaterial;
   private lock: ReturnType<typeof canvasTexture>;
   private notice = canvasTexture(LOCK_W, NOTICE_H);
   private minuteTimer = 0;
@@ -78,12 +81,18 @@ export class PhoneScreen {
       uLock: { value: this.lock.texture },
       uNotice: { value: this.notice.texture },
     };
-    this.material = new THREE.ShaderMaterial({
-      uniforms: this.uniforms,
-      vertexShader: SCREEN_VERTEX,
-      fragmentShader: SCREEN_FRAGMENT,
-      toneMapped: false,
-    });
+    // Dalle noire et satinée (polariseur) ; sous une vitre collée, elle n’a pas de reflet à elle.
+    this.material = new THREE.MeshPhysicalMaterial({ color: 0x000000, metalness: 0, roughness: 0.14, specularIntensity: 0, toneMapped: false });
+    this.material.onBeforeCompile = (shader) => {
+      Object.assign(shader.uniforms, this.uniforms);
+      shader.vertexShader = shader.vertexShader
+        .replace("#include <common>", "#include <common>\nvarying vec2 vScreenUv;")
+        .replace("#include <uv_vertex>", "#include <uv_vertex>\nvScreenUv = uv;");
+      shader.fragmentShader = shader.fragmentShader
+        .replace("#include <common>", `#include <common>\n${SCREEN_IMAGE}`)
+        .replace("#include <emissivemap_fragment>", "#include <emissivemap_fragment>\ntotalEmissiveRadiance = screenImage(vScreenUv);");
+    };
+    this.material.customProgramCacheKey = () => "repareliya-screen";
     this.draw();
     // Les polices de la page ne sont pas forcément prêtes : on redessine dès qu’elles le sont.
     document.fonts?.ready.then(() => this.draw());
@@ -175,15 +184,8 @@ export class PhoneScreen {
   }
 }
 
-const SCREEN_VERTEX = /* glsl */ `
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-const SCREEN_FRAGMENT = /* glsl */ `
+/** Image de la dalle (couleurs en espace linéaire), injectée en émission dans le matériau physique. */
+const SCREEN_IMAGE = /* glsl */ `
   uniform float uTime;
   uniform float uPower;
   uniform float uBroken;
@@ -192,7 +194,7 @@ const SCREEN_FRAGMENT = /* glsl */ `
   uniform vec2 uImpact;
   uniform sampler2D uLock;
   uniform sampler2D uNotice;
-  varying vec2 vUv;
+  varying vec2 vScreenUv;
 
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
   float noise(vec2 p) {
@@ -212,8 +214,7 @@ const SCREEN_FRAGMENT = /* glsl */ `
     return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
   }
 
-  void main() {
-    vec2 uv = vUv;
+  vec3 screenImage(vec2 uv) {
     vec2 p = (uv - 0.5) * vec2(uAspect, 1.0);
 
     // Fond d’écran : rubans de lumière orange qui ondulent lentement.
@@ -249,7 +250,8 @@ const SCREEN_FRAGMENT = /* glsl */ `
     float off = smoothstep(radius - 0.05, radius, r);
     float rim = (1.0 - smoothstep(0.0, 0.035, abs(r - radius))) * step(0.001, uPower) * (1.0 - smoothstep(0.85, 1.0, uPower));
 
-    // Dalle cassée : colonnes de pixels morts qui clignotent, tache d’encre autour de l’impact.
+    // Dalle cassée encore sous tension (le grésillement juste après l’impact) : colonnes de pixels
+    // morts qui clignotent, tache d’encre autour de l’impact. Hors tension, un OLED est noir.
     float column = floor(uv.x * 170.0);
     float flick = step(0.45, hash(vec2(floor(uTime * 9.0), column)));
     vec3 dead = vec3(0.0, 0.85, 0.5) * step(0.982, hash(vec2(column, 3.0))) * (0.18 + 0.3 * flick);
@@ -257,11 +259,10 @@ const SCREEN_FRAGMENT = /* glsl */ `
     float band2 = step(0.96, hash(vec2(floor(uv.y * 90.0), floor(uTime * 3.0))));
     dead += vec3(0.25, 0.3, 0.4) * band2 * 0.12;
     float ink = smoothstep(0.3, 0.02, length((uv - uImpact) * vec2(uAspect, 1.0)) + (fbm(uv * 14.0) - 0.5) * 0.2);
-    vec3 blank = vec3(0.006) + dead * uBroken * (1.0 - ink);
+    vec3 blank = dead * uBroken * (1.0 - ink) * smoothstep(0.0, 0.06, uPower);
 
     col = mix(col, blank, off);
     col += vec3(0.3, 0.62, 1.0) * rim * 1.8;
-    gl_FragColor = vec4(col, 1.0);
-    #include <colorspace_fragment>
+    return col;
   }
 `;
