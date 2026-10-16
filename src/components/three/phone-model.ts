@@ -236,8 +236,8 @@ function batteryLabel() {
   ctx.fillStyle = "#1d1d1f";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   const band = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  band.addColorStop(0, "#2997ff");
-  band.addColorStop(1, "#0071e3");
+  band.addColorStop(0, "#df1432");
+  band.addColorStop(1, "#940016");
   ctx.fillStyle = band;
   ctx.fillRect(0, 0, 20, canvas.height);
 

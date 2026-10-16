@@ -15,7 +15,7 @@ export function Footer({ settings, socials }: { settings: SiteSettings; socials:
     <footer className="mt-auto border-t border-line bg-surface">
       <div className="container-page grid gap-9 py-10 sm:gap-10 sm:py-14 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1.1fr]">
         <div>
-          <Logo name={settings.business_name} />
+          <Logo name={settings.business_name} className="text-[30px]" />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">{settings.tagline}</p>
           {socials.length ? (
             <ul className="mt-6 flex flex-wrap gap-2" aria-label="Réseaux sociaux">

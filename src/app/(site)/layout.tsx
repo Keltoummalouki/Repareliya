@@ -35,7 +35,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
     <>
       {/* Défilement fluide d’abord : le préchargement et le menu mobile s’appuient sur lui */}
       <SmoothScroll />
-      <Preloader name={settings.business_name} />
+      <Preloader />
       <a
         href="#contenu"
         className="sr-only z-50 rounded-md bg-ink px-4 py-3 text-sm text-on-fill focus:not-sr-only focus:fixed focus:left-4 focus:top-4"

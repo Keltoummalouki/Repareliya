@@ -42,7 +42,7 @@ const GLOW_FRAGMENT = /* glsl */ `
   void main() {
     float d = length(vUv - 0.5) * 2.0;
     float glow = pow(max(0.0, 1.0 - d), 2.2);
-    gl_FragColor = vec4(vec3(0.22, 0.48, 1.0) * glow * uOpacity, glow * uOpacity);
+    gl_FragColor = vec4(vec3(0.91, 0.22, 0.28) * glow * uOpacity, glow * uOpacity);
   }
 `;
 const DUST_VERTEX = /* glsl */ `
@@ -65,7 +65,7 @@ const DUST_FRAGMENT = /* glsl */ `
   void main() {
     float d = length(gl_PointCoord - 0.5);
     float a = smoothstep(0.5, 0.0, d) * vAlpha;
-    gl_FragColor = vec4(vec3(0.82, 0.9, 1.0) * a, a);
+    gl_FragColor = vec4(vec3(1.0, 0.85, 0.85) * a, a);
   }
 `;
 
@@ -94,7 +94,7 @@ function softboxTexture(edge: number) {
  * se voient que par ce qu’ils reflètent), grande boîte à lumière au plafond, deux boîtes verticales
  * de part et d’autre de l’objectif (le reflet doux qui glisse sur l’écran quand le téléphone
  * tourne), deux rubans latéraux qui tracent les arêtes du titane, un panneau gris pour le modelé
- * des flancs, et un ruban bleu en contre-jour, signature des visuels produit d’apple.com.
+ * des flancs, et un ruban rouge en contre-jour, aux couleurs du logo.
  */
 function createStudio() {
   const studio = new THREE.Scene();
@@ -136,7 +136,7 @@ function createStudio() {
   light(0.45, 9, 5, [-7, 0.8, 0.6], crisp); // ruban gauche
   light(0.45, 9, 4, [7, 0.8, -1.2], crisp); // ruban droit
   light(6, 4, 0.45, [-4.5, 2.2, -5], soft); // panneau gris, arrière gauche
-  light(0.5, 8, 3, [-1.8, 1.2, -7], crisp, 0x3d8bff); // ruban bleu en contre-jour
+  light(0.5, 8, 3, [-1.8, 1.2, -7], crisp, 0xeb5258); // ruban rouge en contre-jour
 
   return {
     studio,
@@ -164,7 +164,7 @@ export class PhoneScene {
   private model: PhoneModel;
   private glow: THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>;
   private dust: THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial>;
-  private flashLight = new THREE.PointLight(0x5aa9ff, 0, 5, 1.6);
+  private flashLight = new THREE.PointLight(0xf47b7e, 0, 5, 1.6);
   private envTarget: THREE.WebGLRenderTarget;
   private labels: StageLabel[];
   private layout!: Layout;
@@ -205,7 +205,7 @@ export class PhoneScene {
     // (vitre arrière, batterie, carte mère) et détachent la silhouette du fond.
     const key = new THREE.DirectionalLight(0xffffff, 1.1);
     key.position.set(2.5, 3, 4);
-    const rim = new THREE.DirectionalLight(0xc4dcff, 0.9);
+    const rim = new THREE.DirectionalLight(0xfdcccc, 0.9);
     rim.position.set(-3, 1.2, -2.5);
     const back = new THREE.DirectionalLight(0xffffff, 0.7);
     back.position.set(3.2, -1.2, -2);
@@ -222,7 +222,7 @@ export class PhoneScene {
     this.model = buildPhone({ quality, pixelRatio });
     this.intro.add(this.model.root);
 
-    // Halo bleuté derrière le téléphone, qui s’intensifie quand l’écran se rallume.
+    // Halo rouge derrière le téléphone, qui s’intensifie quand l’écran se rallume.
     this.glow = new THREE.Mesh(
       new THREE.PlaneGeometry(5.5, 5.5),
       new THREE.ShaderMaterial({

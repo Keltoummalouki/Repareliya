@@ -53,7 +53,7 @@ export class Sparks {
         void main() {
           float d = length(gl_PointCoord - 0.5);
           float core = smoothstep(0.5, 0.0, d);
-          vec3 color = mix(vec3(0.08, 0.38, 1.0), vec3(0.88, 0.95, 1.0), smoothstep(0.25, 1.0, vLife) * core);
+          vec3 color = mix(vec3(0.85, 0.01, 0.16), vec3(1.0, 0.91, 0.91), smoothstep(0.25, 1.0, vLife) * core);
           float a = core * core * vLife;
           if (a < 0.004) discard;
           gl_FragColor = vec4(color * a * 2.0, a);

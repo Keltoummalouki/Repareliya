@@ -43,9 +43,9 @@ const fromLeft: CSSProperties = { transformOrigin: "left center" };
 function ScreenGradient({ id }: { id: string }) {
   return (
     <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stopColor="#2997ff" />
-      <stop offset="0.55" stopColor="#5e5ce6" />
-      <stop offset="1" stopColor="#bf5af2" />
+      <stop offset="0" stopColor="#f8616c" />
+      <stop offset="0.55" stopColor="#d00e2d" />
+      <stop offset="1" stopColor="#940016" />
     </linearGradient>
   );
 }
@@ -85,7 +85,7 @@ function PhoneArt({ uid }: { uid: string }) {
         <path data-crack d="M62 88 L92 76 L114 44" />
         <path data-crack d="M56 82 L64 78 L70 86 L64 94 L54 92 Z" />
       </g>
-      <rect data-scan x="27" y="17" width="106" height="3" rx="1.5" fill="#64d2ff" opacity="0" />
+      <rect data-scan x="27" y="17" width="106" height="3" rx="1.5" fill="#ffa8a9" opacity="0" />
       <rect x="62" y="23" width="36" height="11" rx="5.5" fill="#000" />
       <Check x={130} y={234} />
     </svg>
@@ -106,7 +106,7 @@ function TabletArt({ uid }: { uid: string }) {
       <path
         data-ink
         d="M58 120 C70 98 84 132 98 110 S124 94 136 114 S160 130 176 104 S196 100 204 112"
-        stroke="#0071e3"
+        stroke="#d00e2d"
         strokeWidth="3.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -191,7 +191,7 @@ function GamepadArt() {
       <rect x="133" y="64" width="11" height="5" rx="2.5" fill="currentColor" opacity="0.5" />
       {buttons.map(([cx, cy]) => (
         <g key={`${cx}-${cy}`}>
-          <circle data-btn cx={cx} cy={cy} r="7.5" fill="#0071e3" />
+          <circle data-btn cx={cx} cy={cy} r="7.5" fill="#d00e2d" />
           <circle cx={cx} cy={cy} r="7.5" stroke="currentColor" strokeWidth="2" />
         </g>
       ))}

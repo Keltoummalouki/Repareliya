@@ -7,8 +7,8 @@ import type { ComponentProps, ReactNode } from "react";
 type Variant = "primary" | "dark" | "outline" | "ghost" | "danger" | "whatsapp" | "soft";
 type Size = "sm" | "md" | "lg" | "icon";
 
-// Boutons en pilule, à la manière d’apple.com : bleu plein pour l’action principale,
-// contour bleu pour l’action secondaire.
+// Boutons en pilule, à la manière d’apple.com : rouge plein pour l’action principale,
+// contour rouge pour l’action secondaire.
 const base =
   "inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-[-0.01em] transition-[background,color,border-color,transform] duration-200 disabled:opacity-60 disabled:pointer-events-none select-none whitespace-nowrap";
 

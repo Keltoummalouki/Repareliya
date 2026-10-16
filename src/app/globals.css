@@ -3,8 +3,9 @@
 /* dark: suit data-theme sur <html>, posé avant le rendu par themeScript (src/lib/theme.ts) */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* Palette et typographie inspirées d’apple.com : noir, gris #1d1d1f / #f5f5f7, texte secondaire
-   #86868b, bleu #0071e3 pour les actions et #0066cc / #2997ff pour les liens. */
+/* Typographie et neutres inspirés d’apple.com : noir, gris #1d1d1f / #f5f5f7, texte secondaire
+   #86868b. Couleur principale : le rouge du logo, #d00e2d pour les actions et les accents,
+   #b60020 pour les liens, et #f8616c (sa lueur) sur les fonds sombres. */
 @theme {
   --color-bg: #f5f5f7;
   --color-surface: #ffffff;
@@ -15,35 +16,36 @@
   --color-faint: #86868b;
   --color-line: #e3e3e8;
   --color-line-strong: #d2d2d7;
-  --color-brand: #0071e3;
-  --color-brand-strong: #0066cc;
-  --color-brand-dark: #004f9f;
-  --color-brand-soft: #e8f1fc;
-  --color-brand-soft-hover: #d6e7fa;
+  --color-brand: #d00e2d;
+  --color-brand-strong: #b60020;
+  --color-brand-dark: #8a0315;
+  --color-brand-soft: #feeded;
+  --color-brand-soft-hover: #fddddd;
   --color-success: #248a3d;
   --color-success-soft: #e8f5ec;
   --color-warning: #b25000;
   --color-warning-soft: #fdf1e3;
   --color-danger: #d70015;
   --color-danger-soft: #fde8ea;
+  /* Statut « en cours / envoyé » : reste bleu, pour ne pas se confondre avec le rouge de la marque ni l’erreur */
   --color-info: #0066cc;
   --color-info-soft: #e8f1fc;
   --color-whatsapp: #128c4a;
-  /* Bouton d’action principal (« Acheter » sur apple.com) : même bleu dans les deux thèmes */
-  --color-cta: #0071e3;
-  --color-cta-hover: #0077ed;
+  /* Bouton d’action principal : le rouge du logo, le même dans les deux thèmes */
+  --color-cta: #d00e2d;
+  --color-cta-hover: #d91531;
   /* Texte posé sur un aplat plein (ink, brand-strong, danger…) */
   --color-on-fill: #ffffff;
   /* Toujours sombre, quel que soit le thème (bandeaux, légendes sur photo) */
   --color-charcoal: #1d1d1f;
   --color-scrim: rgb(0 0 0 / 0.4);
-  --color-selection: #b4d5fe;
+  --color-selection: #fcc4c4;
   /* Scènes sombres « produit » (accueil 3D, rideaux, méthode), identiques dans les deux thèmes */
   --color-night: #000000;
   --color-night-soft: #1d1d1f;
-  /* Texte clair et accents bleus posés sur ces scènes sombres (fixes, quel que soit le thème) */
+  /* Texte clair et accents rosés posés sur ces scènes sombres (fixes, quel que soit le thème) */
   --color-snow: #f5f5f7;
-  --color-sky: #2997ff;
+  --color-rose: #f8616c;
 
   /* SF Pro sur les appareils Apple (police du système), Inter ailleurs : la plus proche, libre de droits */
   --font-sans: -apple-system, BlinkMacSystemFont, var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -74,11 +76,11 @@
   --color-faint: #86868b;
   --color-line: #2c2c2e;
   --color-line-strong: #424245;
-  --color-brand: #2997ff;
-  --color-brand-strong: #2997ff;
-  --color-brand-dark: #8ec5ff;
-  --color-brand-soft: #0d2441;
-  --color-brand-soft-hover: #133159;
+  --color-brand: #f8616c;
+  --color-brand-strong: #f8616c;
+  --color-brand-dark: #f6aeaf;
+  --color-brand-soft: #3e1515;
+  --color-brand-soft-hover: #531a1c;
   --color-success: #30d158;
   --color-success-soft: #0e2a17;
   --color-warning: #ffb340;
@@ -89,7 +91,7 @@
   --color-info-soft: #0d2441;
   --color-on-fill: #000000;
   --color-scrim: rgb(0 0 0 / 0.6);
-  --color-selection: #0a4a8c;
+  --color-selection: #831921;
 
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 30px -14px rgb(0 0 0 / 0.7);
   --shadow-float: 0 18px 50px -20px rgb(0 0 0 / 0.8);
@@ -116,8 +118,9 @@
   ::selection {
     background: var(--color-selection);
   }
+  /* brand plutôt que brand-strong : en thème clair, l’anneau reste visible sur les scènes noires */
   :focus-visible {
-    outline: 2px solid var(--color-brand-strong);
+    outline: 2px solid var(--color-brand);
     outline-offset: 3px;
   }
   button:not(:disabled),
@@ -186,7 +189,7 @@
   .field-input:focus {
     outline: none;
     border-color: var(--color-brand);
-    box-shadow: 0 0 0 4px rgb(0 113 227 / 0.2);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-brand) 20%, transparent);
   }
   .field-input[aria-invalid="true"] {
     border-color: var(--color-danger);

@@ -39,11 +39,11 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.roundRect(x, y, w, h, r);
 }
 
-/** Pictogramme de la marque, blanc sur carré bleu arrondi (icône d’application). */
+/** Pictogramme de la marque, blanc sur carré rouge arrondi (icône d’application). */
 function drawAppIcon(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
   const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
-  gradient.addColorStop(0, "#2997ff");
-  gradient.addColorStop(1, "#0071e3");
+  gradient.addColorStop(0, "#df1432");
+  gradient.addColorStop(1, "#940016");
   ctx.fillStyle = gradient;
   roundRect(ctx, x, y, size, size, size * 0.24);
   ctx.fill();
@@ -217,15 +217,15 @@ const SCREEN_IMAGE = /* glsl */ `
   vec3 screenImage(vec2 uv) {
     vec2 p = (uv - 0.5) * vec2(uAspect, 1.0);
 
-    // Fond d’écran : rubans de lumière orange qui ondulent lentement.
+    // Fond d’écran : rubans de lumière rouge qui ondulent lentement.
     float t = uTime * 0.11;
     vec2 warp = vec2(fbm(p * 2.2 + t), fbm(p * 2.2 - t + 4.3));
     float n = fbm(p * 1.7 + warp * 1.9 + vec2(0.0, t * 1.4));
     float band = sin((p.y * 3.4 - p.x * 2.6 + n * 3.6) * 2.1 + uTime * 0.32);
-    // Couleurs en espace linéaire : nuit bleutée, bleu #0071e3, violet #7d5cff, reflets #64d2ff.
-    vec3 hue = mix(vec3(0.0, 0.165, 0.768), vec3(0.205, 0.107, 1.0), smoothstep(0.35, 0.75, warp.x));
-    vec3 col = mix(vec3(0.002, 0.004, 0.03), hue, smoothstep(-0.4, 0.9, band) * (0.45 + n * 0.75));
-    col = mix(col, vec3(0.127, 0.644, 1.0), smoothstep(0.84, 1.0, band) * 0.7);
+    // Couleurs en espace linéaire : nuit rouge sombre #210505, rouge #d00e2d, rouge rosé #d9345d, reflets #ffa8a9.
+    vec3 hue = mix(vec3(0.631, 0.004, 0.026), vec3(0.694, 0.034, 0.109), smoothstep(0.35, 0.75, warp.x));
+    vec3 col = mix(vec3(0.015, 0.002, 0.002), hue, smoothstep(-0.4, 0.9, band) * (0.45 + n * 0.75));
+    col = mix(col, vec3(1.0, 0.392, 0.397), smoothstep(0.84, 1.0, band) * 0.7);
     col *= 0.5 + 0.65 * smoothstep(1.0, 0.0, length(p - vec2(0.12, 0.2)));
 
     // Écran de verrouillage et notification (qui glisse depuis le haut).
@@ -262,7 +262,7 @@ const SCREEN_IMAGE = /* glsl */ `
     vec3 blank = dead * uBroken * (1.0 - ink) * smoothstep(0.0, 0.06, uPower);
 
     col = mix(col, blank, off);
-    col += vec3(0.3, 0.62, 1.0) * rim * 1.8;
+    col += vec3(0.99, 0.43, 0.44) * rim * 1.8;
     return col;
   }
 `;

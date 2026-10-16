@@ -16,7 +16,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/admin/logi
     <main className="grid min-h-screen place-items-center bg-bg px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <Logo />
+          <Logo className="text-[38px]" />
           <p className="mt-3 text-sm text-muted">Tableau de bord de l’atelier</p>
         </div>
         <LoginForm next={target} />

@@ -378,7 +378,7 @@ export default async function HomePage() {
           <div className="relative p-6 sm:p-12 lg:p-16">
             <p className="stage-kicker">Devis gratuit · Sans engagement</p>
             <h2 data-reveal="chars" className="mt-3 font-display text-[38px] font-semibold leading-[1.02] tracking-[-0.035em] sm:text-[60px]">
-              Votre appareil a un souci ? <span className="whitespace-nowrap text-sky">Parlons-en.</span>
+              Votre appareil a un souci ? <span className="whitespace-nowrap text-rose">Parlons-en.</span>
             </h2>
             <p className="mt-5 max-w-md text-[17px] text-[#a1a1a6]">Décrivez la panne en deux minutes et recevez votre devis là où vous le souhaitez.</p>
             <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">

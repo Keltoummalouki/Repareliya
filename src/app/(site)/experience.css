@@ -1,6 +1,7 @@
 /* ======================================================================================
-   Expérience animée du site public, aux couleurs d’apple.com : noir, gris #1d1d1f,
-   texte #f5f5f7 / #86868b, bleu #0071e3 pour agir et #2997ff pour les accents sur fond sombre.
+   Expérience animée du site public, à la manière d’apple.com : noir, gris #1d1d1f, texte
+   #f5f5f7 / #86868b, et le rouge du logo : --color-cta pour agir, --color-rose pour les
+   accents sur fond sombre.
    En-tête, curseur, rideaux, préchargement, scène 3D, bandeaux, cartes et effets de texte.
    Chargé par le layout du site public seulement ; styles hors couche : ils priment sur les
    utilitaires Tailwind qu’ils ajustent.
@@ -51,6 +52,15 @@
 /* Se retire au défilement vers le bas, sauf si le clavier y navigue */
 .site-header[data-hidden="true"]:not(:focus-within) {
   transform: translateY(-110%);
+}
+/* Logo : sa hauteur suit la taille du texte (55px) ; réduit à 45px pour tenir dans la pilule */
+.site-header .header-logo {
+  transition: font-size 0.6s var(--ease-expo);
+}
+@media (min-width: 1024px) {
+  .site-header[data-scrolled="true"] .header-logo {
+    font-size: 18px;
+  }
 }
 .site-header .header-icon {
   border-color: transparent;
@@ -127,7 +137,7 @@ a:focus-visible .text-roll::after {
 
 /* -------------------------------------------------------------- Curseur (souris) */
 /* Gris neutre (#86868b), lisible sur le noir comme sur le gris clair. Pas de mode de fusion
-   « différence » : sur un bouton bleu, il inversait les couleurs en une pastille orange. */
+   « différence » : sur un bouton rouge, il inverserait les couleurs en une pastille turquoise. */
 .cursor {
   position: fixed;
   left: 0;
@@ -239,7 +249,7 @@ a:focus-visible .text-roll::after {
   display: grid;
   place-items: center;
   background:
-    radial-gradient(55% 45% at 50% 55%, rgb(41 151 255 / 0.12), transparent 70%),
+    radial-gradient(55% 45% at 50% 55%, color-mix(in oklab, var(--color-rose) 12%, transparent), transparent 70%),
     var(--color-night);
   color: #f5f5f7;
 }
@@ -293,7 +303,7 @@ html[data-intro] .preloader {
 .preloader-glow {
   position: absolute;
   inset: -20%;
-  background: radial-gradient(36% 30% at 50% 50%, rgb(41 151 255 / 0.14), transparent 70%);
+  background: radial-gradient(36% 30% at 50% 50%, color-mix(in oklab, var(--color-rose) 14%, transparent), transparent 70%);
 }
 .preloader-content {
   position: relative;
@@ -302,26 +312,11 @@ html[data-intro] .preloader {
   align-items: center;
   gap: 24px;
 }
+/* Le logo, dévoilé de gauche à droite par preloader.tsx */
 .preloader-mark {
-  width: 70px;
+  width: clamp(220px, 26vw, 320px);
   height: auto;
-  overflow: visible;
   opacity: 0;
-}
-.preloader-path {
-  fill: #f5f5f7;
-  fill-opacity: 0;
-  stroke: #f5f5f7;
-  stroke-width: 6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.preloader-word {
-  font-family: var(--font-display);
-  font-size: clamp(26px, 5vw, 40px);
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
   clip-path: inset(0% 100% 0% 0%);
 }
 .preloader-bar {
@@ -339,7 +334,7 @@ html[data-intro] .preloader {
   border-radius: inherit;
   transform: scaleX(0);
   transform-origin: 0 50%;
-  background: linear-gradient(90deg, var(--color-cta), var(--color-sky));
+  background: linear-gradient(90deg, var(--color-cta), var(--color-rose));
 }
 .preloader-status {
   position: absolute;
@@ -367,7 +362,7 @@ html[data-intro] .preloader {
   height: 2px;
   transform: scaleX(0);
   transform-origin: 0 50%;
-  background: linear-gradient(90deg, var(--color-cta), var(--color-sky));
+  background: linear-gradient(90deg, var(--color-cta), var(--color-rose));
   pointer-events: none;
 }
 
@@ -412,14 +407,14 @@ html[data-intro] .preloader {
   overflow: hidden;
   isolation: isolate;
 }
-/* Noir profond, un halo bleuté à peine perceptible et un projecteur venu d’en haut */
+/* Noir profond, un halo rouge à peine perceptible et un projecteur venu d’en haut */
 .stage-bg {
   position: absolute;
   inset: 0;
   z-index: -2;
   background:
     radial-gradient(50% 40% at 50% -5%, rgb(255 255 255 / 0.07), transparent 70%),
-    radial-gradient(60% 50% at 70% 50%, rgb(41 151 255 / 0.08), transparent 66%),
+    radial-gradient(60% 50% at 70% 50%, color-mix(in oklab, var(--color-rose) 8%, transparent), transparent 66%),
     #000;
 }
 /* Éclair au moment de l’impact */
@@ -606,10 +601,10 @@ html[data-intro] .preloader {
   width: 8px;
   height: 8px;
   border-radius: 99px;
-  background: var(--color-sky);
+  background: var(--color-rose);
   box-shadow:
-    0 0 0 4px rgb(41 151 255 / 0.22),
-    0 0 18px rgb(41 151 255 / 0.9);
+    0 0 0 4px color-mix(in oklab, var(--color-rose) 22%, transparent),
+    0 0 18px color-mix(in oklab, var(--color-rose) 90%, transparent);
 }
 .stage-label-line {
   flex: none;
@@ -665,7 +660,7 @@ html[data-intro] .preloader {
   border-radius: inherit;
   transform: scaleX(0);
   transform-origin: 0 50%;
-  background: linear-gradient(90deg, var(--color-cta), var(--color-sky));
+  background: linear-gradient(90deg, var(--color-cta), var(--color-rose));
 }
 .stage-meter-text {
   font: 500 13px/1 var(--font-sans);
@@ -674,7 +669,7 @@ html[data-intro] .preloader {
   color: #86868b;
 }
 .stage[data-repaired="true"] .stage-meter-text {
-  color: var(--color-sky);
+  color: var(--color-rose);
 }
 /* Version fixe : sans WebGL, sans JavaScript ou avec moins d’animations */
 .stage-fallback {
@@ -742,7 +737,7 @@ html[data-intro] .preloader {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(38% 36% at 80% 14%, rgb(0 113 227 / 0.08), transparent 70%);
+  background: radial-gradient(38% 36% at 80% 14%, color-mix(in oklab, var(--color-cta) 8%, transparent), transparent 70%);
   -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent 92%);
   mask-image: linear-gradient(to bottom, #000 35%, transparent 92%);
   transition: opacity 0.9s var(--ease-expo);
@@ -917,7 +912,7 @@ html[data-intro] .preloader {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(0 113 227 / 0.1), transparent 45%);
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), color-mix(in oklab, var(--color-cta) 10%, transparent), transparent 45%);
   opacity: 0;
   transition: opacity 0.4s;
   pointer-events: none;
@@ -933,7 +928,7 @@ html[data-intro] .preloader {
   overflow: hidden;
   padding: 1.5px;
   border-radius: calc(var(--radius-card) + 1.5px);
-  box-shadow: 0 40px 90px -50px rgb(0 113 227 / 0.45);
+  box-shadow: 0 40px 90px -50px color-mix(in oklab, var(--color-cta) 45%, transparent);
 }
 .glow-frame::before {
   content: "";
@@ -944,7 +939,7 @@ html[data-intro] .preloader {
   width: max(200%, 1400px);
   aspect-ratio: 1;
   translate: -50% -50%;
-  background: conic-gradient(transparent 0 62%, rgb(0 113 227 / 0.9) 76%, #2997ff 82%, transparent 90%);
+  background: conic-gradient(transparent 0 62%, color-mix(in oklab, var(--color-cta) 90%, transparent) 76%, var(--color-rose) 82%, transparent 90%);
   animation: glow-spin 8s linear infinite;
 }
 @keyframes glow-spin {
@@ -1008,9 +1003,9 @@ html[data-intro] .preloader {
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: rgb(41 151 255 / 0.14);
-  box-shadow: inset 0 0 0 1px rgb(41 151 255 / 0.3);
-  color: var(--color-sky);
+  background: color-mix(in oklab, var(--color-rose) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-rose) 30%, transparent);
+  color: var(--color-rose);
 }
 
 /* ----------------------------------------------------- Appel final (accueil) */
@@ -1022,7 +1017,8 @@ html[data-intro] .preloader {
   width: min(780px, 95%);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: conic-gradient(#0071e3, #2997ff, #7d5cff, #bf5af2, #0071e3);
+  /* rouge, lueur rosée, grenat et rouge sombre : les nuances du logo */
+  background: conic-gradient(var(--color-cta), var(--color-rose), #940016, #590911, var(--color-cta));
   filter: blur(90px);
   opacity: 0.32;
   animation: glow-spin 18s linear infinite;

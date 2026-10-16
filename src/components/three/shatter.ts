@@ -402,7 +402,7 @@ export function createShardMaterial(uniforms: ShardUniforms, outline: GlassOutli
         alpha += side * (1.0 - healed) * 0.12;
         light += vec3(1.0, 0.95, 0.9) * crackLight * 0.9;
         alpha = max(alpha, crack * 0.15 + crackLight * 0.6);
-        light += vec3(0.16, 0.5, 1.0) * waveFront * 2.4;
+        light += vec3(0.95, 0.29, 0.3) * waveFront * 2.4;
         alpha = max(alpha, waveFront * 0.55);
         // Liseré de Fresnel : vue de biais (dos, vue éclatée), la vitre se dessine aussi par ses bords.
         light += vec3(0.78, 0.84, 0.95) * grazing * uSheen * 0.5 * (1.0 - innerFace);

@@ -140,7 +140,7 @@ export function Header({
         {/* site-header-bar : au défilement (grands écrans), la barre se détache en pilule flottante (experience.css) */}
         <div className="site-header-bar container-page flex h-16 items-center justify-between gap-6 sm:h-18">
           <Link href="/" aria-label={`${businessName}, accueil`} onClick={() => setOpen(false)} data-magnetic>
-            <Logo name={businessName} />
+            <Logo name={businessName} className="header-logo" />
           </Link>
           <nav aria-label="Navigation principale" className="hidden items-center gap-7 text-[13px] lg:flex">
             {NAV.map((item) => (

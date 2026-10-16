@@ -23,7 +23,7 @@ export class ShardField {
   private field = new THREE.Group();
   private shards: { mesh: THREE.Mesh; base: THREE.Vector3; spin: THREE.Vector3; phase: number }[] = [];
   private glass: THREE.MeshPhysicalMaterial;
-  private amber: THREE.MeshPhysicalMaterial;
+  private accent: THREE.MeshPhysicalMaterial;
   private envTarget: THREE.WebGLRenderTarget;
   private pointer = { x: 0, y: 0, tx: 0, ty: 0 };
   private scroll = 0;
@@ -48,7 +48,7 @@ export class ShardField {
 
     const key = new THREE.DirectionalLight(0xffffff, 1.4);
     key.position.set(2, 3, 4);
-    const rim = new THREE.DirectionalLight(0x4d9bff, 2.4);
+    const rim = new THREE.DirectionalLight(0xf8616c, 2.4);
     rim.position.set(-3, 1, -2);
     this.scene.add(key, rim);
 
@@ -61,10 +61,10 @@ export class ShardField {
       side: THREE.DoubleSide,
       depthWrite: false,
     });
-    // Quelques éclats bleu Apple parmi le verre.
-    this.amber = new THREE.MeshPhysicalMaterial({
-      color: 0x2997ff,
-      emissive: 0x0071e3,
+    // Quelques éclats rouges parmi le verre.
+    this.accent = new THREE.MeshPhysicalMaterial({
+      color: 0xf8616c,
+      emissive: 0xd00e2d,
       emissiveIntensity: 0.4,
       metalness: 0.1,
       roughness: 0.15,
@@ -99,7 +99,7 @@ export class ShardField {
       const geometry = new THREE.ExtrudeGeometry(shape, { depth: 0.02, bevelEnabled: true, bevelThickness: 0.006, bevelSize: 0.006, bevelSegments: 1 });
       geometry.center();
       this.geometries.push(geometry);
-      const mesh = new THREE.Mesh(geometry, i % 7 === 3 ? this.amber : this.glass);
+      const mesh = new THREE.Mesh(geometry, i % 7 === 3 ? this.accent : this.glass);
       const base = new THREE.Vector3((rand() - 0.5) * 3.6, (rand() - 0.5) * 2.6, (rand() - 0.5) * 2.2);
       mesh.position.copy(base);
       mesh.rotation.set(rand() * Math.PI, rand() * Math.PI, rand() * Math.PI);
@@ -186,7 +186,7 @@ export class ShardField {
     this.running = false;
     for (const geometry of this.geometries) geometry.dispose();
     this.glass.dispose();
-    this.amber.dispose();
+    this.accent.dispose();
     this.envTarget.dispose();
     this.renderer.dispose();
   }

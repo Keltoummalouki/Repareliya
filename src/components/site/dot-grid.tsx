@@ -31,7 +31,7 @@ export function DotGrid({ className, gap = 34, radius = 1.4 }: { className?: str
     let width = 0;
     let height = 0;
     let color = "#fff";
-    const accent = "#2997ff";
+    const accent = "#f8616c";
     const pointer = { x: -9999, y: -9999, inside: false };
     let animating = 0;
     let looping = false;
